@@ -318,26 +318,51 @@ def fetch_newsdata_io(query, api_key):
         return None
 
 def load_env_api_key(key_name):
-    # 1. Streamlit Secrets (Cloud Deployment)
+    # 1. Streamlit Secrets (Cloud Deployment & .streamlit/secrets.toml)
     try:
+        # Direct key check
         if key_name in st.secrets:
-            return st.secrets[key_name]
+            val = str(st.secrets[key_name]).strip().strip('"\'')
+            if val:
+                return val
+        # Case-insensitive checks
+        if key_name.lower() in st.secrets:
+            val = str(st.secrets[key_name.lower()]).strip().strip('"\'')
+            if val:
+                return val
+        if key_name.upper() in st.secrets:
+            val = str(st.secrets[key_name.upper()]).strip().strip('"\'')
+            if val:
+                return val
+        # Check inside nested TOML tables/sections (e.g. [general], [api_keys], etc.)
+        for section in st.secrets.values():
+            if isinstance(section, dict):
+                for k, v in section.items():
+                    if k.lower() == key_name.lower():
+                        val = str(v).strip().strip('"\'')
+                        if val:
+                            return val
     except Exception:
         pass
 
     # 2. Environment Variables
-    value = os.getenv(key_name)
+    value = os.getenv(key_name) or os.getenv(key_name.lower()) or os.getenv(key_name.upper())
     if value:
-        return value
+        return value.strip().strip('"\'')
 
     # 3. Local .env file
     if os.path.exists(".env"):
         try:
-            with open(".env", "r") as f:
+            with open(".env", "r", encoding="utf-8") as f:
                 for line in f:
-                    parts = line.strip().split("=", 1)
-                    if len(parts) == 2 and parts[0].strip() == key_name:
-                        return parts[1].strip()
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    parts = line.split("=", 1)
+                    if len(parts) == 2:
+                        k = parts[0].strip()
+                        if k.lower() == key_name.lower():
+                            return parts[1].strip().strip('"\'')
         except Exception:
             pass
 
@@ -612,6 +637,18 @@ else:
         st.sidebar.warning("⚠️ Retraining required (Feature dimension mismatch)")
     else:
         st.sidebar.warning("⚠️ Retraining required (No models loaded)")
+
+st.sidebar.markdown("### 🔑 Live APIs Status")
+gemini_detected = bool(load_env_api_key("GEMINI_API_KEY"))
+news_detected = bool(load_env_api_key("NEWS_API_KEY"))
+newsdata_detected = bool(load_env_api_key("NEWSDATA_API_KEY"))
+
+if gemini_detected and (news_detected or newsdata_detected):
+    st.sidebar.success("🟢 Fact-Checking APIs Active")
+elif gemini_detected or news_detected or newsdata_detected:
+    st.sidebar.warning("🟡 Partial APIs Connected")
+else:
+    st.sidebar.info("⚪ Offline Mode (ML Models Only)")
 st.sidebar.markdown("---")
 train_trigger = st.sidebar.button("🚀 Train All Models", use_container_width=True)
 
@@ -1254,7 +1291,7 @@ with tab3:
         with col_newsapi:
             st.markdown("#### 📰 NewsAPI Coverage")
             if not news_api_key:
-                st.info("⚠️ NewsAPI key is not configured in `.env` file.")
+                st.info("⚠️ NewsAPI key is not configured in Streamlit Secrets or `.env`.")
             elif res["newsapi_count"] == 0:
                 st.warning("🔍 No matching coverage found on NewsAPI.")
             else:
@@ -1273,7 +1310,7 @@ with tab3:
         with col_newsdata:
             st.markdown("#### 📡 NewsData.io Coverage")
             if not newsdata_api_key:
-                st.info("⚠️ NewsData.io key is not configured in `.env` file.")
+                st.info("⚠️ NewsData.io key is not configured in Streamlit Secrets or `.env`.")
             elif res["newsdata_count"] == 0:
                 st.warning("🔍 No matching coverage found on NewsData.io.")
             else:
