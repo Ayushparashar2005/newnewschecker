@@ -318,37 +318,41 @@ def fetch_newsdata_io(query, api_key):
         return None
 
 def load_env_api_key(key_name):
+    # Support common naming variations / aliases
+    aliases = [key_name]
+    if "NEWS_API" in key_name or "NEWSAPI" in key_name:
+        aliases += ["NEWS_API_KEY", "NEWSAPI_KEY", "NEWS_API", "NEWSAPI", "NEWS_KEY", "NEWSAPIKEY"]
+    elif "NEWSDATA" in key_name or "NEWS_DATA" in key_name:
+        aliases += ["NEWSDATA_API_KEY", "NEWSDATA_KEY", "NEWS_DATA_API_KEY", "NEWS_DATA_KEY", "NEWSDATA", "NEWSDATA_API"]
+    elif "GEMINI" in key_name or "GOOGLE" in key_name:
+        aliases += ["GEMINI_API_KEY", "GEMINI_KEY", "GOOGLE_API_KEY", "GEMINI_API", "GEMINI"]
+
     # 1. Streamlit Secrets (Cloud Deployment & .streamlit/secrets.toml)
     try:
-        # Direct key check
-        if key_name in st.secrets:
-            val = str(st.secrets[key_name]).strip().strip('"\'')
-            if val:
-                return val
-        # Case-insensitive checks
-        if key_name.lower() in st.secrets:
-            val = str(st.secrets[key_name.lower()]).strip().strip('"\'')
-            if val:
-                return val
-        if key_name.upper() in st.secrets:
-            val = str(st.secrets[key_name.upper()]).strip().strip('"\'')
-            if val:
-                return val
-        # Check inside nested TOML tables/sections (e.g. [general], [api_keys], etc.)
-        for section in st.secrets.values():
-            if isinstance(section, dict):
-                for k, v in section.items():
-                    if k.lower() == key_name.lower():
-                        val = str(v).strip().strip('"\'')
-                        if val:
-                            return val
+        for alias in aliases:
+            # Check direct & case-insensitive keys
+            for sec_k, sec_v in st.secrets.items():
+                if sec_k.lower() == alias.lower():
+                    val = str(sec_v).strip().strip('"\'')
+                    if val:
+                        return val
+                elif isinstance(sec_v, dict):
+                    # Check inside nested sections like [general], [api_keys], etc.
+                    for sub_k, sub_v in sec_v.items():
+                        if sub_k.lower() == alias.lower():
+                            val = str(sub_v).strip().strip('"\'')
+                            if val:
+                                return val
     except Exception:
         pass
 
     # 2. Environment Variables
-    value = os.getenv(key_name) or os.getenv(key_name.lower()) or os.getenv(key_name.upper())
-    if value:
-        return value.strip().strip('"\'')
+    for alias in aliases:
+        value = os.getenv(alias) or os.getenv(alias.lower()) or os.getenv(alias.upper())
+        if value:
+            val = value.strip().strip('"\'')
+            if val:
+                return val
 
     # 3. Local .env file
     if os.path.exists(".env"):
@@ -361,8 +365,11 @@ def load_env_api_key(key_name):
                     parts = line.split("=", 1)
                     if len(parts) == 2:
                         k = parts[0].strip()
-                        if k.lower() == key_name.lower():
-                            return parts[1].strip().strip('"\'')
+                        for alias in aliases:
+                            if k.lower() == alias.lower():
+                                val = parts[1].strip().strip('"\'')
+                                if val:
+                                    return val
         except Exception:
             pass
 
