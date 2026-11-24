@@ -20,16 +20,17 @@ class KNNClassifier(BaseModel):
         self.y_train = np.array(y)
         return self
 
-    def predict(self, X):
+    def _k_nearest_labels(self, X):
         """
-        Predicts classes for the test samples in X.
+        Returns the labels of the k nearest neighbors for each sample in X.
         """
         X = np.array(X)
-        predictions = []
+        all_neighbor_labels = []
         
         # Determine predictions in batches to prevent memory blowup
         batch_size = 500
         n_samples = X.shape[0]
+        k_eff = min(self.k, len(self.X_train))
         
         for i in range(0, n_samples, batch_size):
             X_batch = X[i : i + batch_size]
@@ -37,7 +38,6 @@ class KNNClassifier(BaseModel):
             # Compute distance matrix of shape (batch_size, X_train.shape[0])
             if self.metric == 'cosine':
                 # Cosine distance = 1 - cosine_similarity
-                # norm of vectors
                 norm_batch = np.linalg.norm(X_batch, axis=1, keepdims=True)
                 norm_train = np.linalg.norm(self.X_train, axis=1, keepdims=True).T
                 
@@ -54,24 +54,31 @@ class KNNClassifier(BaseModel):
                 y2 = np.sum(self.X_train ** 2, axis=1, keepdims=True).T
                 xy = np.dot(X_batch, self.X_train.T)
                 
-                # Use clip to avoid negative values due to floating point error
                 dists = np.sqrt(np.clip(x2 + y2 - 2 * xy, 0, None))
                 
-            # For each test sample in batch, find k nearest indices
-            # argpartition is faster than argsort: O(N) vs O(N log N)
-            k_nearest_indices = np.argpartition(dists, self.k - 1, axis=1)[:, :self.k]
+            k_nearest_indices = np.argpartition(dists, k_eff - 1, axis=1)[:, :k_eff]
             
-            # Retrieve labels of k nearest neighbors
             for row_idx, indices in enumerate(k_nearest_indices):
-                # Sort indices of the row by distance to get accurate k nearest if partition was unordered
                 row_dists = dists[row_idx, indices]
                 sorted_k_indices = indices[np.argsort(row_dists)]
+                all_neighbor_labels.append(self.y_train[sorted_k_indices])
                 
-                neighbor_labels = self.y_train[sorted_k_indices]
-                
-                # Find majority label
-                counts = np.bincount(neighbor_labels.astype(int))
-                majority_label = np.argmax(counts)
-                predictions.append(majority_label)
-                
+        return all_neighbor_labels
+
+    def predict_proba(self, X):
+        """
+        Predicts probability of class 1 (Fake) based on neighbor vote fraction.
+        """
+        neighbor_labels_list = self._k_nearest_labels(X)
+        return np.array([float(np.mean(labels == 1)) for labels in neighbor_labels_list])
+
+    def predict(self, X):
+        """
+        Predicts classes for the test samples in X.
+        """
+        neighbor_labels_list = self._k_nearest_labels(X)
+        predictions = []
+        for neighbor_labels in neighbor_labels_list:
+            counts = np.bincount(neighbor_labels.astype(int))
+            predictions.append(np.argmax(counts))
         return np.array(predictions)

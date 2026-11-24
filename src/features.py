@@ -14,11 +14,11 @@ class CustomCountVectorizer:
         """
         word_counts = Counter()
         for doc in raw_documents:
-            # If document is a raw string, preprocess it
+            # Lowercase consistently so vocabulary deduplicates casing variants
             if isinstance(doc, str):
-                tokens = doc.split()
+                tokens = doc.lower().split()
             else:
-                tokens = list(doc)
+                tokens = [str(t).lower() for t in doc]
             word_counts.update(tokens)
 
         # Get top max_features words
@@ -40,9 +40,9 @@ class CustomCountVectorizer:
 
         for idx, doc in enumerate(raw_documents):
             if isinstance(doc, str):
-                tokens = doc.split()
+                tokens = doc.lower().split()
             else:
-                tokens = list(doc)
+                tokens = [str(t).lower() for t in doc]
             
             # Count words for this document
             doc_counts = Counter(tokens)

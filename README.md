@@ -145,11 +145,11 @@ Options:
 
 ## 📊 Benchmark Results
 
-On a balanced subset of 2,000 articles using a vocabulary size of 1,000 features, the custom classifiers yielded the following results:
+On a balanced subset of 2,000 articles (title + body text) using a vocabulary size of 1,000 TF-IDF features plus normalized `[0, 1]` stylistic features, the custom classifiers yielded the following results:
 
-| Model Name | Test Accuracy | Test Precision | Test Recall | Test F1-Score | Training Time |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Simple Neural Network** | **97.25%** | **97.52%** | **97.04%** | **97.28%** | ~11.60s |
-| **Logistic Regression** | **92.00%** | **98.31%** | **85.71%** | **91.58%** | ~0.34s |
-| **Random Forest** | **90.50%** | **98.82%** | **82.27%** | **89.78%** | ~6.14s |
-| **K-Nearest Neighbors** | **81.75%** | **91.67%** | **70.44%** | **79.67%** | ~0.01s |
+| Model Name | Train Accuracy | Test Accuracy | Test Precision | Test Recall | Test F1-Score | Training Time |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Simple Neural Network** | 99.75% | **95.50%** | **96.95%** | **94.09%** | **95.50%** | ~8.28s |
+| **Logistic Regression** | 94.00% | **92.50%** | **95.29%** | **89.66%** | **92.39%** | ~0.07s |
+| **Random Forest** | 93.44% | **87.50%** | **100.00%** | **75.37%** | **85.96%** | ~1.66s |
+| **K-Nearest Neighbors** | 91.13% | **86.00%** | **91.06%** | **80.30%** | **85.34%** | ~0.00s |

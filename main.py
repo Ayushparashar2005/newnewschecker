@@ -67,8 +67,10 @@ def main():
         print(f"Error: {e}")
         return
         
-    # We will use 'text' column for classification. Let's handle titles as well if needed, but text has more context.
-    texts = df['text'].fillna("").values
+    # Concatenate title and text so headline signals are preserved
+    titles = df['title'].fillna("") if 'title' in df.columns else pd.Series([""] * len(df))
+    bodies = df['text'].fillna("") if 'text' in df.columns else pd.Series([""] * len(df))
+    texts = (titles + " " + bodies).str.strip().values
     labels = df['label'].values
     
     # 2. Preprocess Data

@@ -53,13 +53,19 @@ class DecisionTreeClassifier(BaseModel):
         for feat_idx in feature_indices:
             X_column = X[:, feat_idx]
             
-            # To speed up continuous search, inspect a subset of thresholds (e.g. 5 percentiles)
-            # instead of every single unique value in the dataset
+            # Evaluate midpoints for small unique counts, or zero + nonzero percentiles for sparse TF-IDF
             uniques = np.unique(X_column)
-            if len(uniques) > 10:
-                thresholds = np.percentile(X_column, [10, 30, 50, 70, 90])
+            if len(uniques) <= 1:
+                continue
+            if len(uniques) <= 15:
+                thresholds = (uniques[:-1] + uniques[1:]) / 2.0
             else:
-                thresholds = uniques
+                nonzero = X_column[X_column > 0]
+                if len(nonzero) > 0:
+                    nz_pcts = np.unique(np.percentile(nonzero, [10, 25, 50, 75, 90]))
+                    thresholds = np.unique(np.concatenate(([0.0], nz_pcts)))
+                else:
+                    thresholds = np.percentile(X_column, [10, 30, 50, 70, 90])
                 
             for thresh in thresholds:
                 # Split indices

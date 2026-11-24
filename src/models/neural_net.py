@@ -2,7 +2,7 @@ import numpy as np
 from src.models.base import BaseModel
 
 class SimpleNeuralNetwork(BaseModel):
-    def __init__(self, hidden_dim=64, lr=0.01, epochs=100, batch_size=64, verbose=False):
+    def __init__(self, hidden_dim=64, lr=0.01, epochs=100, batch_size=64, lambda_reg=0.001, verbose=False):
         """
         A simple Multi-Layer Perceptron (MLP) classifier from scratch.
         Architecture: Input -> Hidden (ReLU) -> Output (Sigmoid)
@@ -10,11 +10,13 @@ class SimpleNeuralNetwork(BaseModel):
         lr: learning rate
         epochs: number of epochs to train
         batch_size: batch size for mini-batch gradient descent
+        lambda_reg: L2 regularization penalty to prevent overfitting
         """
         self.hidden_dim = hidden_dim
         self.lr = lr
         self.epochs = epochs
         self.batch_size = batch_size
+        self.lambda_reg = lambda_reg
         self.verbose = verbose
         
         # Weights and Biases
@@ -81,20 +83,21 @@ class SimpleNeuralNetwork(BaseModel):
                 Z2 = np.dot(A1, self.W2) + self.b2
                 A2 = self._sigmoid(Z2)
                 
-                # Compute Loss (Binary Cross Entropy)
+                # Compute Loss (Binary Cross Entropy + L2 regularization)
                 eps = 1e-15
                 loss = -np.mean(y_batch * np.log(A2 + eps) + (1 - y_batch) * np.log(1 - A2 + eps))
-                epoch_loss += loss * (m_batch / n_samples)
+                reg_loss = (self.lambda_reg / (2 * m_batch)) * (np.sum(self.W1 ** 2) + np.sum(self.W2 ** 2))
+                epoch_loss += (loss + reg_loss) * (m_batch / n_samples)
                 
                 # --- BACKWARD PASS ---
                 # Output Layer gradients
                 dZ2 = A2 - y_batch
-                dW2 = (1.0 / m_batch) * np.dot(A1.T, dZ2)
+                dW2 = (1.0 / m_batch) * np.dot(A1.T, dZ2) + (self.lambda_reg / m_batch) * self.W2
                 db2 = (1.0 / m_batch) * np.sum(dZ2, axis=0, keepdims=True)
                 
                 # Hidden Layer gradients
                 dZ1 = np.dot(dZ2, self.W2.T) * self._relu_derivative(Z1)
-                dW1 = (1.0 / m_batch) * np.dot(X_batch.T, dZ1)
+                dW1 = (1.0 / m_batch) * np.dot(X_batch.T, dZ1) + (self.lambda_reg / m_batch) * self.W1
                 db1 = (1.0 / m_batch) * np.sum(dZ1, axis=0, keepdims=True)
                 
                 # --- PARAMETER UPDATES ---
@@ -153,13 +156,14 @@ class SimpleNeuralNetwork(BaseModel):
         
         # --- BACKPROPAGATION ---
         m = X.shape[0]
+        reg = getattr(self, "lambda_reg", 0.001)
         dZ2 = A2 - y
-        dW2 = (1 / m) * np.dot(A1.T, dZ2)
+        dW2 = (1 / m) * np.dot(A1.T, dZ2) + (reg / m) * self.W2
         db2 = (1 / m) * np.sum(dZ2, axis=0, keepdims=True)
         
         dA1 = np.dot(dZ2, self.W2.T)
         dZ1 = dA1 * self._relu_derivative(Z1)
-        dW1 = (1 / m) * np.dot(X.T, dZ1)
+        dW1 = (1 / m) * np.dot(X.T, dZ1) + (reg / m) * self.W1
         db1 = (1 / m) * np.sum(dZ1, axis=0, keepdims=True)
         
         # --- PARAMETER UPDATES ---

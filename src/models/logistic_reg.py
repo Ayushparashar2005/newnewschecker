@@ -34,8 +34,9 @@ class LogisticRegressionClassifier(BaseModel):
         
         n_samples, n_features = X.shape
         
-        # Xavier-style initialization of weights
-        self.weights = np.zeros((n_features, 1))
+        # Small random initialization to break feature symmetry and speed up convergence
+        np.random.seed(42)
+        self.weights = np.random.randn(n_features, 1) * 0.01
         self.bias = 0.0
         self.loss_history = []
         
@@ -127,7 +128,8 @@ class LogisticRegressionClassifier(BaseModel):
         """
         if self.weights is None:
             # Initialize if not already fitted
-            self.weights = np.zeros((X.shape[1], 1))
+            np.random.seed(42)
+            self.weights = np.random.randn(X.shape[1], 1) * 0.01
             self.bias = 0.0
             
         X = np.array(X)

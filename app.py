@@ -121,15 +121,29 @@ def get_dataset_statistics():
     df_fake = pd.read_csv(fake_path)
     return len(df_true), len(df_fake)
 
-def append_stylistic_features(X_tfidf, raw_texts):
+def append_stylistic_features(X_tfidf, raw_texts, stylistic_max=None):
     """
-    Appends extra columns for uppercase ratio and exclamation mark count to the TF-IDF matrix.
-    Scales them so they have a meaningful influence when compared to 0-1 range TF-IDF weights.
+    Appends normalized exclamation mark and uppercase density columns to the TF-IDF matrix.
+    Scales features to [0, 1] to match L2-normalized TF-IDF weights without dominating them.
     """
-    excl = np.array([t.count('!') / (len(t) + 1) for t in raw_texts]).reshape(-1, 1)
-    upper = np.array([sum(1 for c in t if c.isupper()) / (len(t) + 1) for t in raw_texts]).reshape(-1, 1)
-    # Scale by 10 to give these features proportional representation in the sparse space
-    return np.hstack((X_tfidf, excl * 10.0, upper * 10.0))
+    excl = np.array([t.count('!') / (len(t) + 1) for t in raw_texts], dtype=np.float32).reshape(-1, 1)
+    upper = np.array([sum(1 for c in t if c.isupper()) / (len(t) + 1) for t in raw_texts], dtype=np.float32).reshape(-1, 1)
+    if stylistic_max is None:
+        max_excl, max_upper = 0.05, 0.30
+    else:
+        max_excl, max_upper = stylistic_max
+    excl_norm = np.clip(excl / max(max_excl, 1e-6), 0.0, 1.0)
+    upper_norm = np.clip(upper / max(max_upper, 1e-6), 0.0, 1.0)
+    return np.hstack((X_tfidf, excl_norm, upper_norm))
+
+def transform_for_prediction(raw_texts, vectorizer):
+    """
+    Unified feature extraction pipeline for inference so train and predict features match identically.
+    """
+    clean_texts = [preprocess_pipeline(t) for t in raw_texts]
+    X_tfidf = vectorizer.transform(clean_texts)
+    stylistic_max = getattr(vectorizer, "stylistic_max_", None)
+    return append_stylistic_features(X_tfidf, raw_texts, stylistic_max=stylistic_max)
 
 def generate_interpretability_html(raw_text, vectorizer, log_reg):
     import re
@@ -219,8 +233,10 @@ def load_and_preprocess_subset(sample_size, vocab_size):
     df_all = pd.concat(df_all_list, ignore_index=True)
     df_all = df_all.sample(frac=1, random_state=42).reset_index(drop=True)
     
-    # Preprocess
-    texts = df_all['text'].fillna("").values
+    # Preprocess (merge title + text so headline signals are included)
+    titles = df_all['title'].fillna("") if 'title' in df_all.columns else pd.Series([""] * len(df_all))
+    bodies = df_all['text'].fillna("") if 'text' in df_all.columns else pd.Series([""] * len(df_all))
+    texts = (titles + " " + bodies).str.strip().values
     labels = df_all['label'].values
     
     clean_texts = [preprocess_pipeline(t) for t in texts]
@@ -228,7 +244,15 @@ def load_and_preprocess_subset(sample_size, vocab_size):
     # Custom Vectorizer
     vectorizer = CustomTfidfVectorizer(max_features=vocab_size)
     X_tfidf = vectorizer.fit_transform(clean_texts)
-    X = append_stylistic_features(X_tfidf, texts)
+    
+    # Compute 99th-percentile stylistic bounds for [0, 1] normalization
+    excl_vals = np.array([t.count('!') / (len(t) + 1) for t in texts], dtype=np.float32)
+    upper_vals = np.array([sum(1 for c in t if c.isupper()) / (len(t) + 1) for t in texts], dtype=np.float32)
+    vectorizer.stylistic_max_ = (
+        float(max(np.percentile(excl_vals, 99), 0.01)),
+        float(max(np.percentile(upper_vals, 99), 0.05))
+    )
+    X = append_stylistic_features(X_tfidf, texts, stylistic_max=vectorizer.stylistic_max_)
     
     return X, labels, vectorizer, clean_texts, df_all
 
@@ -1081,15 +1105,14 @@ with tab3:
                 
                 # 1. Classification Phase
                 with st.spinner("Analyzing text and running custom model predictions..."):
-                    clean_input = preprocess_pipeline(news_input)
-                    x_tfidf = st.session_state.vectorizer.transform([clean_input])
-                    x_input = append_stylistic_features(x_tfidf, [news_input])
+                    x_input = transform_for_prediction([news_input], st.session_state.vectorizer)
 
                     p_knn = st.session_state.knn.predict(x_input)[0]
                     p_log = st.session_state.log_reg.predict(x_input)[0]
                     p_rf = st.session_state.rf.predict(x_input)[0]
                     p_nn = st.session_state.nn.predict(x_input)[0]
 
+                    prob_knn = st.session_state.knn.predict_proba(x_input)[0] if hasattr(st.session_state.knn, "predict_proba") else float(p_knn)
                     prob_log = st.session_state.log_reg.predict_proba(x_input)[0]
                     prob_nn = st.session_state.nn.predict_proba(x_input)[0]
                     
@@ -1200,6 +1223,7 @@ with tab3:
                     "p_log": p_log,
                     "p_rf": p_rf,
                     "p_nn": p_nn,
+                    "prob_knn": prob_knn,
                     "prob_log": prob_log,
                     "prob_nn": prob_nn,
                     "search_query": search_query,
@@ -1246,11 +1270,13 @@ with tab3:
         with col_pred1:
             cls_knn = "model-card-fake" if res["p_knn"] == 1 else "model-card-real"
             lbl_knn = "🚨 FAKE NEWS" if res["p_knn"] == 1 else "🟢 REAL NEWS"
+            prob_knn_val = res.get("prob_knn", float(res["p_knn"]))
+            conf_knn = prob_knn_val if res["p_knn"] == 1 else (1.0 - prob_knn_val)
             st.markdown(f"""
             <div class='{cls_knn}'>
                 <div class='card-title'>K-Nearest Neighbors</div>
                 <h2 style='margin:0;'>{lbl_knn}</h2>
-                <div style='font-size:0.85rem; opacity:0.85;'>Based on k={res.get('k_neighbors', 5)} closest articles</div>
+                <div style='font-size:0.85rem; opacity:0.85;'>Confidence: {conf_knn:.1%} (k={res.get('k_neighbors', 5)} closest articles)</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -1422,10 +1448,8 @@ with tab3:
                 label_val = 0 if true_label_choice == "Real News" else 1
                 
                 with st.spinner("Refining models in real-time..."):
-                    # Preprocess and extract features
-                    clean_fb = preprocess_pipeline(last_text)
-                    x_tfidf_fb = st.session_state.vectorizer.transform([clean_fb])
-                    x_input_fb = append_stylistic_features(x_tfidf_fb, [last_text])
+                    # Preprocess and extract features using unified pipeline
+                    x_input_fb = transform_for_prediction([last_text], st.session_state.vectorizer)
                     
                     # Online updates
                     # 1. KNN
@@ -1469,6 +1493,7 @@ with tab3:
                     p_rf = st.session_state.rf.predict(x_input_fb)[0]
                     p_nn = st.session_state.nn.predict(x_input_fb)[0]
 
+                    prob_knn = st.session_state.knn.predict_proba(x_input_fb)[0] if hasattr(st.session_state.knn, "predict_proba") else float(p_knn)
                     prob_log = st.session_state.log_reg.predict_proba(x_input_fb)[0]
                     prob_nn = st.session_state.nn.predict_proba(x_input_fb)[0]
                     
@@ -1478,6 +1503,7 @@ with tab3:
                     res["p_log"] = p_log
                     res["p_rf"] = p_rf
                     res["p_nn"] = p_nn
+                    res["prob_knn"] = prob_knn
                     res["prob_log"] = prob_log
                     res["prob_nn"] = prob_nn
                     res["k_neighbors"] = st.session_state.knn.k
