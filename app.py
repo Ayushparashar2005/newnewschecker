@@ -25,7 +25,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Bauhaus + Neumorphism Design System CSS (Light Theme)
+# Bauhaus + Neumorphism Design System CSS (Dark Theme)
 st.markdown("""
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,21 +33,21 @@ st.markdown("""
 
 <style>
     :root {
-        --bg-base: #EEF0F5;
-        --bg-raised: #F5F6FA;
-        --bg-subtle: #E6E8F0;
-        --shadow-dark: #C8CAD6;
-        --shadow-light: #FFFFFF;
+        --bg-base: #1E1E2E;
+        --bg-raised: #252535;
+        --bg-subtle: #191926;
+        --shadow-dark: #12121C;
+        --shadow-light: #2D2D40;
         --accent-primary: #E63946;   /* Bauhaus Red */
         --accent-real: #2A9D8F;      /* Bauhaus Teal */
         --accent-fake: #E63946;      /* Bauhaus Red */
-        --accent-yellow: #D4860F;    /* Bauhaus Ochre */
+        --accent-yellow: #F4A261;    /* Bauhaus Ochre */
         --accent-navy: #1D3557;      /* Bauhaus Navy */
         --accent-purple: #7B2FBE;    /* Bauhaus Purple */
         --accent-blue: #457B9D;      /* Bauhaus Steel Blue */
-        --text-primary: #1A1A2E;
-        --text-secondary: #5A5A7A;
-        --grid-line: #D2D4E0;
+        --text-primary: #E8E8F0;
+        --text-secondary: #9090A8;
+        --grid-line: #2C2C40;
         --font-display: 'Space Grotesk', -apple-system, sans-serif;
         --font-body: 'DM Sans', -apple-system, sans-serif;
         --font-mono: 'JetBrains Mono', monospace;
@@ -60,7 +60,7 @@ st.markdown("""
         font-family: var(--font-body) !important;
     }
 
-    /* Custom Bauhaus Pill Scrollbar */
+    /* Custom Bauhaus Pill Scrollbar (Dark Theme) */
     ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
@@ -100,13 +100,13 @@ st.markdown("""
         box-shadow: 6px 6px 14px var(--shadow-dark),
                    -6px -6px 14px var(--shadow-light);
         border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.03);
     }
 
     .nm-inset {
         background: var(--bg-subtle);
-        box-shadow: inset 3px 3px 7px var(--shadow-dark),
-                   inset -3px -3px 7px var(--shadow-light);
+        box-shadow: inset 4px 4px 8px var(--shadow-dark),
+                   inset -4px -4px 8px var(--shadow-light);
         border-radius: 10px;
     }
 
@@ -152,7 +152,7 @@ st.markdown("""
         padding: 20px 22px;
         position: relative;
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.02);
     }
     .metric-card::before {
         content: "";
@@ -160,7 +160,7 @@ st.markdown("""
         top: 0;
         left: 0;
         right: 0;
-        height: 4px;
+        height: 3px;
         background: var(--card-accent, var(--accent-primary));
     }
     .metric-value {
@@ -190,7 +190,7 @@ st.markdown("""
         border-radius: 0 12px 12px 0;
         padding: 18px 20px;
         margin: 10px 0;
-        border: 1px solid rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.02);
     }
     .model-card-fake {
         background: var(--bg-raised);
@@ -200,7 +200,7 @@ st.markdown("""
         border-radius: 0 12px 12px 0;
         padding: 18px 20px;
         margin: 10px 0;
-        border: 1px solid rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.02);
     }
     .card-title {
         font-family: var(--font-mono);
@@ -244,7 +244,7 @@ st.markdown("""
     section[data-testid="stSidebar"] {
         background: var(--bg-raised) !important;
         border-right: 3px solid var(--accent-primary) !important;
-        box-shadow: 4px 0 16px rgba(0, 0, 0, 0.05) !important;
+        box-shadow: 6px 0 20px rgba(0, 0, 0, 0.4) !important;
     }
     section[data-testid="stSidebar"] .block-container {
         padding-top: 2rem !important;
@@ -291,8 +291,6 @@ st.markdown("""
         background: var(--bg-raised) !important;
         border-radius: 10px !important;
         border: 1px solid var(--grid-line) !important;
-        box-shadow: 4px 4px 10px var(--shadow-dark),
-                   -4px -4px 10px var(--shadow-light) !important;
         overflow: hidden !important;
     }
 
@@ -301,8 +299,7 @@ st.markdown("""
         background: var(--bg-raised) !important;
         border: 1px solid var(--grid-line) !important;
         border-radius: 8px !important;
-        box-shadow: 3px 3px 8px var(--shadow-dark),
-                   -3px -3px 8px var(--shadow-light) !important;
+        box-shadow: 3px 3px 8px var(--shadow-dark) !important;
     }
 
     /* Radio / Selection options */
@@ -325,16 +322,16 @@ def section_heading(title: str, label: str = "", accent: str = "#E63946"):
 
 # Standard Matplotlib Bauhaus theme
 BAUHAUS_CHART_STYLE = {
-    "figure.facecolor": "#EEF0F5",
-    "axes.facecolor": "#F5F6FA",
-    "axes.edgecolor": "#D2D4E0",
-    "axes.labelcolor": "#5A5A7A",
-    "text.color": "#1A1A2E",
-    "xtick.color": "#5A5A7A",
-    "ytick.color": "#5A5A7A",
-    "grid.color": "#D2D4E0",
+    "figure.facecolor": "#1E1E2E",
+    "axes.facecolor": "#252535",
+    "axes.edgecolor": "#2C2C40",
+    "axes.labelcolor": "#9090A8",
+    "text.color": "#E8E8F0",
+    "xtick.color": "#9090A8",
+    "ytick.color": "#9090A8",
+    "grid.color": "#2C2C40",
     "grid.linestyle": "--",
-    "grid.alpha": 0.6,
+    "grid.alpha": 0.5,
     "font.family": "sans-serif",
 }
 
@@ -409,12 +406,12 @@ def generate_interpretability_html(raw_text, vectorizer, log_reg):
             if weight > threshold:
                 # Fake association (Red shading)
                 highlighted_tokens.append(
-                    f"<span style='background-color: rgba(230, 57, 70, 0.16); color: #C52838; border-bottom: 2px solid #E63946; border-radius: 4px; padding: 1px 3px; font-weight: 600; cursor: help;' title='Weight: {weight:+.4f} (Fake News factor)'>{escaped_token}</span>"
+                    f"<span style='background-color: rgba(239, 68, 68, 0.18); color: #F87171; border-radius: 4px; padding: 1px 3px; font-weight: 600; cursor: help;' title='Weight: {weight:+.4f} (Fake News factor)'>{escaped_token}</span>"
                 )
             elif weight < -threshold:
                 # Real association (Green shading)
                 highlighted_tokens.append(
-                    f"<span style='background-color: rgba(42, 157, 143, 0.16); color: #1E7B70; border-bottom: 2px solid #2A9D8F; border-radius: 4px; padding: 1px 3px; font-weight: 600; cursor: help;' title='Weight: {weight:+.4f} (Real News factor)'>{escaped_token}</span>"
+                    f"<span style='background-color: rgba(16, 185, 129, 0.18); color: #34D399; border-radius: 4px; padding: 1px 3px; font-weight: 600; cursor: help;' title='Weight: {weight:+.4f} (Real News factor)'>{escaped_token}</span>"
                 )
             else:
                 highlighted_tokens.append(escaped_token)
@@ -432,6 +429,8 @@ def load_and_preprocess_subset(sample_size, vocab_size):
     """
     true_path = os.path.join("dataset", "True.csv")
     fake_path = os.path.join("dataset", "Fake.csv")
+    if not os.path.exists(true_path) or not os.path.exists(fake_path):
+        return None, None, None, None, None
     df_true = pd.read_csv(true_path)
     df_fake = pd.read_csv(fake_path)
     
@@ -848,12 +847,10 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Check for files
+# Check for files (graceful degradation if deployed without raw training CSVs)
 true_path = os.path.join("dataset", "True.csv")
 fake_path = os.path.join("dataset", "Fake.csv")
-if not os.path.exists(true_path) or not os.path.exists(fake_path):
-    st.error("⚠️ Dataset files (True.csv and Fake.csv) not found in the 'dataset' folder. Please verify the environment.")
-    st.stop()
+dataset_available = os.path.exists(true_path) and os.path.exists(fake_path)
 
 # Sidebar: Hyperparameters and Settings
 st.sidebar.markdown("""
@@ -1144,10 +1141,13 @@ with tab1:
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown(section_heading("Exploratory Word Count Analysis", label="EXPLORATORY DATA ANALYSIS", accent="#2A9D8F"), unsafe_allow_html=True)
-    
-    # Load a small snippet for EDA preview to keep it fast
-    X_eda, y_eda, vectorizer_eda, clean_texts_eda, df_eda = load_and_preprocess_subset(1000, 500)
+    if not dataset_available:
+        st.info("ℹ️ Raw dataset files (True.csv and Fake.csv) are not hosted in this cloud deployment. The **System Overview** and **Live Verifier** run smoothly with serialized model weights.")
+    else:
+        st.markdown(section_heading("Exploratory Word Count Analysis", label="EXPLORATORY DATA ANALYSIS", accent="#2A9D8F"), unsafe_allow_html=True)
+        
+        # Load a small snippet for EDA preview to keep it fast
+        X_eda, y_eda, vectorizer_eda, clean_texts_eda, df_eda = load_and_preprocess_subset(1000, 500)
     
     # Compute text word counts
     df_eda['word_count'] = df_eda['text'].apply(lambda x: len(str(x).split()))
@@ -1159,20 +1159,20 @@ with tab1:
         with plt.rc_context(BAUHAUS_CHART_STYLE):
             fig, ax = plt.subplots(figsize=(10, 5))
             sns.histplot(data=df_eda, x='word_count', hue='label', kde=True, bins=30, palette={0: '#2A9D8F', 1: '#E63946'}, ax=ax, alpha=0.65)
-            ax.set_xlabel("Word Count", color='#1A1A2E')
-            ax.set_ylabel("Count", color='#1A1A2E')
-            ax.set_title("Length Distribution: Real (Teal) vs Fake (Red)", color='#1A1A2E', fontweight="bold")
-            ax.tick_params(colors='#5A5A7A')
+            ax.set_xlabel("Word Count", color='#E8E8F0')
+            ax.set_ylabel("Count", color='#E8E8F0')
+            ax.set_title("Length Distribution: Real (Teal) vs Fake (Red)", color='#E8E8F0', fontweight="bold")
+            ax.tick_params(colors='#9090A8')
             for spine in ax.spines.values():
-                spine.set_color('#D2D4E0')
+                spine.set_color('#2C2C40')
             legend = ax.get_legend()
             if legend:
                 legend.get_texts()[0].set_text('Real News')
                 legend.get_texts()[1].set_text('Fake News')
-                legend.get_frame().set_facecolor('#F5F6FA')
-                legend.get_frame().set_edgecolor('#D2D4E0')
+                legend.get_frame().set_facecolor('#252535')
+                legend.get_frame().set_edgecolor('#2C2C40')
                 for text in legend.get_texts():
-                    text.set_color('#1A1A2E')
+                    text.set_color('#E8E8F0')
             st.pyplot(fig)
         
     with col_chart2:
@@ -1187,12 +1187,12 @@ with tab1:
             fig, ax = plt.subplots(figsize=(10, 5))
             palette_colors = ["#E63946", "#2A9D8F", "#F4A261", "#457B9D"] * 3
             sns.barplot(x='tf_idf_weight', y='word', data=freq_df, palette=palette_colors[:len(freq_df)], ax=ax)
-            ax.set_xlabel("Cumulative TF-IDF Score", color='#1A1A2E')
-            ax.set_ylabel("Terms", color='#1A1A2E')
-            ax.set_title("Top 10 Distinguishing Vocabulary Terms", color='#1A1A2E', fontweight="bold")
-            ax.tick_params(colors='#5A5A7A')
+            ax.set_xlabel("Cumulative TF-IDF Score", color='#E8E8F0')
+            ax.set_ylabel("Terms", color='#E8E8F0')
+            ax.set_title("Top 10 Distinguishing Vocabulary Terms", color='#E8E8F0', fontweight="bold")
+            ax.tick_params(colors='#9090A8')
             for spine in ax.spines.values():
-                spine.set_color('#D2D4E0')
+                spine.set_color('#2C2C40')
             st.pyplot(fig)
 
     st.markdown("""
@@ -1205,7 +1205,10 @@ with tab1:
 with tab2:
     if train_trigger or st.session_state.trained:
         if train_trigger:
-            st.cache_data.clear()  # Clear streamlit cache to invalidate old shapes
+            if not dataset_available:
+                st.error("Retraining requires 'True.csv' and 'Fake.csv' inside the 'dataset/' folder.")
+            else:
+                st.cache_data.clear()  # Clear streamlit cache to invalidate old shapes
             with st.spinner("Loading dataset, cleaning text, and building TF-IDF vectors from scratch..."):
                 X, y, vectorizer, clean_texts, df_sampled = load_and_preprocess_subset(sample_size, vocab_size)
                 
@@ -1340,23 +1343,23 @@ with tab2:
             sns.barplot(x="Accuracy", y="Model Name", hue="Split", data=melted_acc, 
                         palette={"Train Accuracy": "#2A9D8F", "Test Accuracy": "#E63946"}, ax=ax_acc)
             ax_acc.set_xlim(0, 1.05)
-            ax_acc.set_title("Train (Teal) vs. Test (Red) Accuracy", color="#1A1A2E", fontsize=12, fontweight="bold")
-            ax_acc.set_xlabel("Accuracy", color="#1A1A2E")
-            ax_acc.set_ylabel("", color="#1A1A2E")
-            ax_acc.legend(facecolor='#F5F6FA', edgecolor='#D2D4E0', labelcolor='#1A1A2E')
-            ax_acc.tick_params(colors="#5A5A7A")
+            ax_acc.set_title("Train (Teal) vs. Test (Red) Accuracy", color="#E8E8F0", fontsize=12, fontweight="bold")
+            ax_acc.set_xlabel("Accuracy", color="#E8E8F0")
+            ax_acc.set_ylabel("", color="#E8E8F0")
+            ax_acc.legend(facecolor='#252535', edgecolor='#2C2C40', labelcolor='#E8E8F0')
+            ax_acc.tick_params(colors="#9090A8")
             for spine in ax_acc.spines.values():
-                spine.set_color('#D2D4E0')
+                spine.set_color('#2C2C40')
                 
             # Training time comparison
             sns.barplot(x="Train Time (s)", y="Model Name", data=compare_df, 
                         palette=["#F4A261", "#2A9D8F", "#E63946", "#457B9D"], ax=ax_time)
-            ax_time.set_title("Computation Time per Model (Seconds)", color="#1A1A2E", fontsize=12, fontweight="bold")
-            ax_time.set_xlabel("Seconds", color="#1A1A2E")
-            ax_time.set_ylabel("", color="#1A1A2E")
-            ax_time.tick_params(colors="#5A5A7A")
+            ax_time.set_title("Computation Time per Model (Seconds)", color="#E8E8F0", fontsize=12, fontweight="bold")
+            ax_time.set_xlabel("Seconds", color="#E8E8F0")
+            ax_time.set_ylabel("", color="#E8E8F0")
+            ax_time.tick_params(colors="#9090A8")
             for spine in ax_time.spines.values():
-                spine.set_color('#D2D4E0')
+                spine.set_color('#2C2C40')
                 
             st.pyplot(fig_comp)
         
@@ -1370,13 +1373,13 @@ with tab2:
             with plt.rc_context(BAUHAUS_CHART_STYLE):
                 fig_loss1, ax_l1 = plt.subplots(figsize=(8, 4))
                 ax_l1.plot(losses_log, color='#2A9D8F', linewidth=2.5)
-                ax_l1.set_xlabel("Iteration / Epoch", color="#1A1A2E")
-                ax_l1.set_ylabel("BCE Loss + L2 Penalty", color="#1A1A2E")
-                ax_l1.set_title("Logistic Regression Cost Curve", color="#1A1A2E", fontweight="bold")
-                ax_l1.tick_params(colors="#5A5A7A")
-                ax_l1.grid(True, color="#D2D4E0", linestyle="--")
+                ax_l1.set_xlabel("Iteration / Epoch", color="#E8E8F0")
+                ax_l1.set_ylabel("BCE Loss + L2 Penalty", color="#E8E8F0")
+                ax_l1.set_title("Logistic Regression Cost Curve", color="#E8E8F0", fontweight="bold")
+                ax_l1.tick_params(colors="#9090A8")
+                ax_l1.grid(True, color="#2C2C40", linestyle="--")
                 for spine in ax_l1.spines.values():
-                    spine.set_color('#D2D4E0')
+                    spine.set_color('#2C2C40')
                 st.pyplot(fig_loss1)
             
         with col_curve2:
@@ -1385,13 +1388,13 @@ with tab2:
             with plt.rc_context(BAUHAUS_CHART_STYLE):
                 fig_loss2, ax_l2 = plt.subplots(figsize=(8, 4))
                 ax_l2.plot(losses_nn, color='#E63946', linewidth=2.5)
-                ax_l2.set_xlabel("Epoch", color="#1A1A2E")
-                ax_l2.set_ylabel("BCE Loss + L2 Penalty", color="#1A1A2E")
-                ax_l2.set_title("Multi-Layer Perceptron Cost Curve", color="#1A1A2E", fontweight="bold")
-                ax_l2.tick_params(colors="#5A5A7A")
-                ax_l2.grid(True, color="#D2D4E0", linestyle="--")
+                ax_l2.set_xlabel("Epoch", color="#E8E8F0")
+                ax_l2.set_ylabel("BCE Loss + L2 Penalty", color="#E8E8F0")
+                ax_l2.set_title("Multi-Layer Perceptron Cost Curve", color="#E8E8F0", fontweight="bold")
+                ax_l2.tick_params(colors="#9090A8")
+                ax_l2.grid(True, color="#2C2C40", linestyle="--")
                 for spine in ax_l2.spines.values():
-                    spine.set_color('#D2D4E0')
+                    spine.set_color('#2C2C40')
                 st.pyplot(fig_loss2)
 
         # Confusion Matrices Section
@@ -1412,15 +1415,15 @@ with tab2:
                 
                 with plt.rc_context(BAUHAUS_CHART_STYLE):
                     fig_cm, ax_cm = plt.subplots(figsize=(4, 4))
-                    sns.heatmap(cm_data, annot=True, fmt="d", cmap=sns.light_palette("#2A9D8F", as_cmap=True), cbar=False,
+                    sns.heatmap(cm_data, annot=True, fmt="d", cmap=sns.dark_palette("#2A9D8F", as_cmap=True), cbar=False,
                                 xticklabels=["Real", "Fake"], yticklabels=["Real", "Fake"], ax=ax_cm,
-                                annot_kws={"size": 13, "weight": "bold", "color": "#1A1A2E"})
+                                annot_kws={"size": 13, "weight": "bold", "color": "#E8E8F0"})
                     
-                    ax_cm.set_xlabel("Predicted", color="#1A1A2E", fontsize=9, fontfamily="sans-serif")
-                    ax_cm.set_ylabel("Actual", color="#1A1A2E", fontsize=9, fontfamily="sans-serif")
-                    ax_cm.tick_params(colors="#5A5A7A")
+                    ax_cm.set_xlabel("Predicted", color="#E8E8F0", fontsize=9, fontfamily="sans-serif")
+                    ax_cm.set_ylabel("Actual", color="#E8E8F0", fontsize=9, fontfamily="sans-serif")
+                    ax_cm.tick_params(colors="#9090A8")
                     for spine in ax_cm.spines.values():
-                        spine.set_color('#D2D4E0')
+                        spine.set_color('#2C2C40')
                     st.pyplot(fig_cm)
                 
     else:
