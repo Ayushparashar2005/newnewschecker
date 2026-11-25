@@ -19,93 +19,291 @@ from src.models.neural_net import SimpleNeuralNetwork
 
 # Setup page layout
 st.set_page_config(
-    page_title="AI Fake News Detector",
-    page_icon="📰",
+    page_title="Fake News Detector | Bauhaus ML",
+    page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom premium styling using CSS injection
+# Bauhaus + Neumorphism Design System CSS
 st.markdown("""
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+
 <style>
-    /* Dark Mode aesthetic customization */
+    :root {
+        --bg-base: #1E1E2E;
+        --bg-raised: #252535;
+        --bg-subtle: #191926;
+        --shadow-dark: #12121C;
+        --shadow-light: #2D2D40;
+        --accent-primary: #E63946;   /* Bauhaus Red */
+        --accent-real: #2A9D8F;      /* Bauhaus Teal */
+        --accent-fake: #E63946;      /* Bauhaus Red */
+        --accent-yellow: #F4A261;    /* Bauhaus Ochre */
+        --accent-navy: #1D3557;      /* Bauhaus Navy */
+        --text-primary: #E8E8F0;
+        --text-secondary: #9090A8;
+        --grid-line: #2C2C40;
+        --font-display: 'Space Grotesk', -apple-system, sans-serif;
+        --font-body: 'DM Sans', -apple-system, sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    /* Core Application Surface */
     .stApp {
-        background-color: #0F172A;
-        color: #F8FAFC;
+        background-color: var(--bg-base) !important;
+        color: var(--text-primary) !important;
+        font-family: var(--font-body) !important;
     }
-    .main-title {
-        font-family: 'Outfit', 'Inter', sans-serif;
-        font-size: 3rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #6366F1, #EC4899);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 0.2rem;
-        text-align: center;
+
+    /* Typography Overrides */
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-display) !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.02em !important;
+        color: var(--text-primary) !important;
     }
-    .sub-title {
-        font-family: 'Inter', sans-serif;
-        font-size: 1.2rem;
-        color: #94A3B8;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    /* Cards and boxes styling */
-    .metric-card {
-        background-color: #1E293B;
+
+    /* Neumorphic Utilities */
+    .nm-raised {
+        background: var(--bg-raised);
+        box-shadow: 6px 6px 14px var(--shadow-dark),
+                   -6px -6px 14px var(--shadow-light);
         border-radius: 12px;
-        padding: 20px;
-        border: 1px solid #334155;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .nm-inset {
+        background: var(--bg-subtle);
+        box-shadow: inset 4px 4px 8px var(--shadow-dark),
+                   inset -4px -4px 8px var(--shadow-light);
+        border-radius: 10px;
+    }
+
+    .nm-flat-accent {
+        background: var(--bg-raised);
+        box-shadow: 5px 5px 12px var(--shadow-dark),
+                   -5px -5px 12px var(--shadow-light);
+        border-left: 4px solid var(--accent-primary);
+        border-radius: 0 12px 12px 0;
+    }
+
+    /* Bauhaus Section Rule Header */
+    .bauhaus-section {
+        margin: 28px 0 16px 0;
+        border-top: 1px solid var(--grid-line);
+        padding-top: 14px;
+    }
+    .bauhaus-section-label {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+    }
+    .bauhaus-section-title {
+        font-family: var(--font-display);
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        border-left: 4px solid var(--accent-primary);
+        padding-left: 12px;
+        line-height: 1.2;
+    }
+
+    /* Bauhaus Metric Card */
+    .metric-card {
+        background: var(--bg-raised);
+        box-shadow: 6px 6px 14px var(--shadow-dark),
+                   -6px -6px 14px var(--shadow-light);
+        border-radius: 12px;
+        padding: 20px 22px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.02);
+    }
+    .metric-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--card-accent, var(--accent-primary));
     }
     .metric-value {
+        font-family: var(--font-mono);
         font-size: 2.2rem;
         font-weight: 700;
-        color: #38BDF8;
+        color: var(--text-primary);
+        line-height: 1.1;
+        margin-top: 6px;
     }
     .metric-label {
-        font-size: 0.9rem;
-        color: #94A3B8;
+        font-family: var(--font-body);
+        font-size: 0.72rem;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.14em;
+        color: var(--text-secondary);
+        margin-top: 6px;
     }
+
+    /* Model Decision Cards (Bauhaus + Neumorphic) */
     .model-card-real {
-        background: linear-gradient(135deg, #064E3B 0%, #022C22 100%);
-        border: 1px solid #059669;
-        border-radius: 12px;
-        padding: 20px;
-        margin: 10px 0px;
+        background: var(--bg-raised);
+        box-shadow: 6px 6px 14px var(--shadow-dark),
+                   -6px -6px 14px var(--shadow-light);
+        border-left: 5px solid var(--accent-real);
+        border-radius: 0 12px 12px 0;
+        padding: 18px 20px;
+        margin: 10px 0;
     }
     .model-card-fake {
-        background: linear-gradient(135deg, #7F1D1D 0%, #450A0A 100%);
-        border: 1px solid #DC2626;
-        border-radius: 12px;
-        padding: 20px;
-        margin: 10px 0px;
+        background: var(--bg-raised);
+        box-shadow: 6px 6px 14px var(--shadow-dark),
+                   -6px -6px 14px var(--shadow-light);
+        border-left: 5px solid var(--accent-fake);
+        border-radius: 0 12px 12px 0;
+        padding: 18px 20px;
+        margin: 10px 0;
     }
     .card-title {
-        font-size: 1.2rem;
-        font-weight: 600;
-        margin-bottom: 8px;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
     }
-    /* Buttons */
-    .stButton>button {
-        background: linear-gradient(135deg, #4F46E5, #7C3AED);
-        color: white;
-        border: none;
-        padding: 10px 24px;
-        font-weight: 600;
-        border-radius: 8px;
-        transition: all 0.3s;
+
+    /* Buttons (Neumorphic Tactile) */
+    .stButton > button {
+        background: var(--bg-raised) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--grid-line) !important;
+        border-radius: 8px !important;
+        box-shadow: 4px 4px 10px var(--shadow-dark),
+                   -4px -4px 10px var(--shadow-light) !important;
+        font-family: var(--font-display) !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.08em !important;
+        padding: 12px 24px !important;
+        transition: all 0.15s ease-in-out !important;
     }
-    .stButton>button:hover {
-        background: linear-gradient(135deg, #6366F1, #8B5CF6);
-        box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
-        transform: translateY(-2px);
+    .stButton > button:hover {
+        color: var(--accent-primary) !important;
+        border-color: var(--accent-primary) !important;
+        box-shadow: 2px 2px 6px var(--shadow-dark),
+                   -2px -2px 6px var(--shadow-light) !important;
+        transform: translateY(-1px);
+    }
+    .stButton > button:active {
+        box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                   inset -3px -3px 6px var(--shadow-light) !important;
+        transform: translateY(1px);
+    }
+
+    /* Sidebar Bauhaus Discipline */
+    section[data-testid="stSidebar"] {
+        background: var(--bg-raised) !important;
+        border-right: 3px solid var(--accent-primary) !important;
+        box-shadow: 6px 0 20px rgba(0, 0, 0, 0.4) !important;
+    }
+    section[data-testid="stSidebar"] .block-container {
+        padding-top: 2rem !important;
+    }
+
+    /* Streamlit Tabs */
+    button[data-baseweb="tab"] {
+        font-family: var(--font-display) !important;
+        font-size: 0.85rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.12em !important;
+        color: var(--text-secondary) !important;
+        border: none !important;
+        border-bottom: 3px solid transparent !important;
+        padding: 12px 24px !important;
+        background: transparent !important;
+    }
+    button[data-baseweb="tab"][aria-selected="true"] {
+        color: var(--text-primary) !important;
+        border-bottom-color: var(--accent-primary) !important;
+    }
+    div[data-testid="stTabs"] > div:first-child {
+        border-bottom: 1px solid var(--grid-line) !important;
+    }
+
+    /* Inputs: text area, text inputs */
+    .stTextArea textarea, .stTextInput input {
+        background: var(--bg-subtle) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--grid-line) !important;
+        border-radius: 8px !important;
+        box-shadow: inset 2px 2px 6px var(--shadow-dark),
+                   inset -2px -2px 6px var(--shadow-light) !important;
+        font-family: var(--font-body) !important;
+    }
+    .stTextArea textarea:focus, .stTextInput input:focus {
+        border-color: var(--accent-primary) !important;
+        outline: none !important;
+    }
+
+    /* Dataframe Table Styling */
+    div[data-testid="stDataFrame"] {
+        background: var(--bg-raised) !important;
+        border-radius: 10px !important;
+        border: 1px solid var(--grid-line) !important;
+        overflow: hidden !important;
+    }
+
+    /* Expander styling */
+    div[data-testid="stExpander"] {
+        background: var(--bg-raised) !important;
+        border: 1px solid var(--grid-line) !important;
+        border-radius: 8px !important;
+        box-shadow: 3px 3px 8px var(--shadow-dark) !important;
+    }
+
+    /* Radio / Selection options */
+    div[role="radiogroup"] {
+        font-family: var(--font-display) !important;
+        font-weight: 600 !important;
     }
 </style>
 """, unsafe_allow_html=True)
+
+# Helper function for structured Bauhaus section headings
+def section_heading(title: str, label: str = "", accent: str = "#E63946"):
+    label_html = f"<div class='bauhaus-section-label'>{label}</div>" if label else ""
+    return f"""
+    <div class='bauhaus-section'>
+        {label_html}
+        <div class='bauhaus-section-title' style='border-left-color: {accent};'>{title}</div>
+    </div>
+    """
+
+# Standard Matplotlib Bauhaus theme
+BAUHAUS_CHART_STYLE = {
+    "figure.facecolor": "#1E1E2E",
+    "axes.facecolor": "#252535",
+    "axes.edgecolor": "#2C2C40",
+    "axes.labelcolor": "#9090A8",
+    "text.color": "#E8E8F0",
+    "xtick.color": "#9090A8",
+    "ytick.color": "#9090A8",
+    "grid.color": "#2C2C40",
+    "grid.linestyle": "--",
+    "grid.alpha": 0.5,
+    "font.family": "sans-serif",
+}
 
 # Helper functions for data loading and model training
 @st.cache_data(show_spinner=False)
@@ -603,8 +801,19 @@ if "trained" not in st.session_state:
         st.session_state.trained = False
 
 # Page Header
-st.markdown("<h1 class='main-title'>📰 AI-Powered Fake News Detector</h1>", unsafe_allow_html=True)
-st.markdown("<p class='sub-title'>A Complete Machine Learning Pipeline Implemented From Scratch</p>", unsafe_allow_html=True)
+st.markdown("""
+<div style="padding: 12px 0 20px 0; border-bottom: 2px solid var(--grid-line); margin-bottom: 24px;">
+    <div style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; color: var(--accent-primary); margin-bottom: 6px;">
+        LABORATORY SYSTEM // FROM-SCRATCH ML
+    </div>
+    <h1 style="font-family: var(--font-display); font-size: 2.8rem; font-weight: 800; color: var(--text-primary); margin: 0; line-height: 1.05; letter-spacing: -0.02em;">
+        Fake News Detector<span style="color: var(--accent-primary);">.</span>
+    </h1>
+    <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); margin-top: 8px; letter-spacing: 0.06em;">
+        LOGISTIC REGRESSION · MULTI-LAYER PERCEPTRON · RANDOM FOREST · K-NEAREST NEIGHBORS
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # Check for files
 true_path = os.path.join("dataset", "True.csv")
@@ -614,7 +823,12 @@ if not os.path.exists(true_path) or not os.path.exists(fake_path):
     st.stop()
 
 # Sidebar: Hyperparameters and Settings
-st.sidebar.markdown("## ⚙️ Configuration Settings")
+st.sidebar.markdown("""
+<div style="margin-bottom: 14px;">
+    <div class="bauhaus-section-label">SYSTEM CONFIGURATION</div>
+    <h3 style="margin: 0; font-size: 1.3rem;">Parameters</h3>
+</div>
+""", unsafe_allow_html=True)
 
 sample_size = st.sidebar.slider("Total Samples (Balanced)", 200, 5000, 2000, step=200, 
                                 help="Number of real & fake news articles to use. KNN & RF splits can be slow on larger sample counts.")
@@ -622,8 +836,13 @@ vocab_size = st.sidebar.slider("Vocabulary Size (Max Features)", 100, 2500, 1000
                                help="Maximum distinct words in the TF-IDF feature space.")
 test_split = st.sidebar.slider("Test Split Ratio", 0.1, 0.5, 0.2, step=0.05)
 
-st.sidebar.markdown("---")
-st.sidebar.markdown("### 🧬 Model Hyperparameters")
+st.sidebar.markdown("<div style='border-top: 1px solid var(--grid-line); margin: 18px 0 14px 0;'></div>", unsafe_allow_html=True)
+st.sidebar.markdown("""
+<div style="margin-bottom: 12px;">
+    <div class="bauhaus-section-label">ALGORITHM TUNING</div>
+    <h3 style="margin: 0; font-size: 1.15rem;">Hyperparameters</h3>
+</div>
+""", unsafe_allow_html=True)
 
 # KNN Params
 with st.sidebar.expander("K-Nearest Neighbors Parameters"):
@@ -659,65 +878,78 @@ if st.session_state.trained:
         if st.session_state.log_reg.weights.shape[0] != expected_features:
             is_compatible = False
 
-st.sidebar.markdown("---")
-st.sidebar.markdown("### 💾 Pre-trained Models Status")
+st.sidebar.markdown("<div style='border-top: 1px solid var(--grid-line); margin: 18px 0 14px 0;'></div>", unsafe_allow_html=True)
+st.sidebar.markdown("""
+<div style="margin-bottom: 8px;">
+    <div class="bauhaus-section-label">MODEL PERSISTENCE</div>
+    <h3 style="margin: 0; font-size: 1.15rem;">Memory Status</h3>
+</div>
+""", unsafe_allow_html=True)
+
 if st.session_state.trained and is_compatible:
-    st.sidebar.success("🟢 Ready (Models loaded)")
+    st.sidebar.success("Ready · Weights Loaded")
 else:
     if st.session_state.trained and not is_compatible:
-        st.sidebar.warning("⚠️ Retraining required (Feature dimension mismatch)")
+        st.sidebar.warning("Retrain Required · Dimension Mismatch")
     else:
-        st.sidebar.warning("⚠️ Retraining required (No models loaded)")
+        st.sidebar.warning("Retrain Required · No Model")
 
-st.sidebar.markdown("### 🔑 Live APIs Status")
+st.sidebar.markdown("""
+<div style="margin: 14px 0 8px 0;">
+    <div class="bauhaus-section-label">CLOUD INFRASTRUCTURE</div>
+    <h3 style="margin: 0; font-size: 1.15rem;">Live API Status</h3>
+</div>
+""", unsafe_allow_html=True)
+
 gemini_detected = bool(load_env_api_key("GEMINI_API_KEY"))
 news_detected = bool(load_env_api_key("NEWS_API_KEY"))
 newsdata_detected = bool(load_env_api_key("NEWSDATA_API_KEY"))
 
 if gemini_detected and (news_detected or newsdata_detected):
-    st.sidebar.success("🟢 Fact-Checking APIs Active")
+    st.sidebar.success("Fact-Checking APIs Active")
 elif gemini_detected or news_detected or newsdata_detected:
-    st.sidebar.warning("🟡 Partial APIs Connected")
+    st.sidebar.warning("Partial APIs Connected")
 else:
-    st.sidebar.info("⚪ Offline Mode (ML Models Only)")
-st.sidebar.markdown("---")
-train_trigger = st.sidebar.button("🚀 Train All Models", use_container_width=True)
+    st.sidebar.info("Offline Mode (Local Models Only)")
+
+st.sidebar.markdown("<div style='border-top: 1px solid var(--grid-line); margin: 18px 0 16px 0;'></div>", unsafe_allow_html=True)
+train_trigger = st.sidebar.button("Train All Models", use_container_width=True)
 
 # Tabs
-tab1, tab2, tab3 = st.tabs(["📊 Dataset & EDA", "⚡ Model Comparison", "🔮 Live Article Predictor"])
+tab1, tab2, tab3 = st.tabs(["DATASET & EDA", "MODEL BENCHMARK", "LIVE VERIFIER"])
 
 # State Initialization completed above.
 
 # TAB 1: DATASET & EDA
 with tab1:
-    st.markdown("### 📊 Dataset Overview & Statistics")
+    st.markdown(section_heading("Dataset Overview & Statistics", label="DATA CORPUS", accent="#E63946"), unsafe_allow_html=True)
     
     n_real, n_fake = get_dataset_statistics()
     
     col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown(f"""
-        <div class='metric-card'>
-            <div class='metric-value' style='color:#10B981;'>{n_real:,}</div>
+        <div class='metric-card' style='--card-accent: #2A9D8F;'>
+            <div class='metric-value' style='color:#2A9D8F;'>{n_real:,}</div>
             <div class='metric-label'>Real News Articles</div>
         </div>
         """, unsafe_allow_html=True)
     with col2:
         st.markdown(f"""
-        <div class='metric-card'>
-            <div class='metric-value' style='color:#EF4444;'>{n_fake:,}</div>
+        <div class='metric-card' style='--card-accent: #E63946;'>
+            <div class='metric-value' style='color:#E63946;'>{n_fake:,}</div>
             <div class='metric-label'>Fake News Articles</div>
         </div>
         """, unsafe_allow_html=True)
     with col3:
         st.markdown(f"""
-        <div class='metric-card'>
-            <div class='metric-value' style='color:#6366F1;'>{n_real + n_fake:,}</div>
-            <div class='metric-label'>Total ISOT Dataset Size</div>
+        <div class='metric-card' style='--card-accent: #F4A261;'>
+            <div class='metric-value' style='color:#F4A261;'>{n_real + n_fake:,}</div>
+            <div class='metric-label'>Total Corpus Size</div>
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("### 📈 Exploratory Word Count Analysis")
+    st.markdown(section_heading("Exploratory Word Count Analysis", label="EXPLORATORY DATA ANALYSIS", accent="#2A9D8F"), unsafe_allow_html=True)
     
     # Load a small snippet for EDA preview to keep it fast
     X_eda, y_eda, vectorizer_eda, clean_texts_eda, df_eda = load_and_preprocess_subset(1000, 500)
@@ -728,59 +960,50 @@ with tab1:
     col_chart1, col_chart2 = st.columns(2)
     
     with col_chart1:
-        st.markdown("#### Text Length Distribution (Word Count)")
-        fig, ax = plt.subplots(figsize=(10, 5))
-        fig.patch.set_facecolor('#0F172A')
-        ax.set_facecolor('#1E293B')
-        
-        # Plot distributions
-        sns.histplot(data=df_eda, x='word_count', hue='label', kde=True, bins=30, palette={0: '#10B981', 1: '#EF4444'}, ax=ax, alpha=0.6)
-        
-        # Aesthetic updates
-        ax.set_xlabel("Word Count", color='#F8FAFC')
-        ax.set_ylabel("Count", color='#F8FAFC')
-        ax.set_title("Real (Green) vs Fake (Red) News length", color='#F8FAFC')
-        ax.tick_params(colors='#F8FAFC')
-        for spine in ax.spines.values():
-            spine.set_color('#334155')
-        legend = ax.get_legend()
-        if legend:
-            legend.get_texts()[0].set_text('Real')
-            legend.get_texts()[1].set_text('Fake')
-            legend.get_frame().set_facecolor('#1E293B')
-            legend.get_frame().set_edgecolor('#334155')
-            for text in legend.get_texts():
-                text.set_color('#F8FAFC')
-                
-        st.pyplot(fig)
+        st.markdown("<div class='bauhaus-section-label'>DISTRIBUTION</div><h4 style='margin:0 0 10px 0;'>Article Length (Word Count)</h4>", unsafe_allow_html=True)
+        with plt.rc_context(BAUHAUS_CHART_STYLE):
+            fig, ax = plt.subplots(figsize=(10, 5))
+            sns.histplot(data=df_eda, x='word_count', hue='label', kde=True, bins=30, palette={0: '#2A9D8F', 1: '#E63946'}, ax=ax, alpha=0.65)
+            ax.set_xlabel("Word Count", color='#E8E8F0')
+            ax.set_ylabel("Count", color='#E8E8F0')
+            ax.set_title("Length Distribution: Real (Teal) vs Fake (Red)", color='#E8E8F0', fontweight="bold")
+            ax.tick_params(colors='#9090A8')
+            for spine in ax.spines.values():
+                spine.set_color('#2C2C40')
+            legend = ax.get_legend()
+            if legend:
+                legend.get_texts()[0].set_text('Real News')
+                legend.get_texts()[1].set_text('Fake News')
+                legend.get_frame().set_facecolor('#252535')
+                legend.get_frame().set_edgecolor('#2C2C40')
+                for text in legend.get_texts():
+                    text.set_color('#E8E8F0')
+            st.pyplot(fig)
         
     with col_chart2:
-        st.markdown("#### Top 10 Most Common Words in Vocabulary")
+        st.markdown("<div class='bauhaus-section-label'>VOCABULARY WEIGHTS</div><h4 style='margin:0 0 10px 0;'>Top 10 High-Weight Terms</h4>", unsafe_allow_html=True)
         vocab = vectorizer_eda.feature_names_
         # Sum columns of word counts (excluding appended stylistic features)
         word_frequencies = np.sum(X_eda[:, :len(vocab)], axis=0)
         
         freq_df = pd.DataFrame({'word': vocab, 'tf_idf_weight': word_frequencies}).sort_values(by='tf_idf_weight', ascending=False).head(10)
         
-        fig, ax = plt.subplots(figsize=(10, 5))
-        fig.patch.set_facecolor('#0F172A')
-        ax.set_facecolor('#1E293B')
-        
-        sns.barplot(x='tf_idf_weight', y='word', data=freq_df, palette="viridis", ax=ax)
-        
-        ax.set_xlabel("Cumulative TF-IDF Score", color='#F8FAFC')
-        ax.set_ylabel("Words", color='#F8FAFC')
-        ax.set_title("Top 10 High-Weight Words in Corpus", color='#F8FAFC')
-        ax.tick_params(colors='#F8FAFC')
-        for spine in ax.spines.values():
-            spine.set_color('#334155')
-            
-        st.pyplot(fig)
+        with plt.rc_context(BAUHAUS_CHART_STYLE):
+            fig, ax = plt.subplots(figsize=(10, 5))
+            palette_colors = ["#E63946", "#2A9D8F", "#F4A261", "#457B9D"] * 3
+            sns.barplot(x='tf_idf_weight', y='word', data=freq_df, palette=palette_colors[:len(freq_df)], ax=ax)
+            ax.set_xlabel("Cumulative TF-IDF Score", color='#E8E8F0')
+            ax.set_ylabel("Terms", color='#E8E8F0')
+            ax.set_title("Top 10 Distinguishing Vocabulary Terms", color='#E8E8F0', fontweight="bold")
+            ax.tick_params(colors='#9090A8')
+            for spine in ax.spines.values():
+                spine.set_color('#2C2C40')
+            st.pyplot(fig)
 
     st.markdown("""
     > [!NOTE]
-    > Notice how **Fake News** and **Real News** display different word length distributions. 
-    > Fake news articles are often shorter or show higher variances in formatting. The TF-IDF weights help capture the exact distinguishing vocabularies.
+    > **Structural Distribution Variance:** Notice how **Fake News** and **Real News** display distinctly different word length distributions. 
+    > Fabricated reporting is often shorter and more sensationalist, whereas authentic reports present balanced paragraphs. The TF-IDF weights capture the distinguishing vocabulary features.
     """)
 
 # TAB 2: MODEL COMPARISON & TRAINING
@@ -788,7 +1011,7 @@ with tab2:
     if train_trigger or st.session_state.trained:
         if train_trigger:
             st.cache_data.clear()  # Clear streamlit cache to invalidate old shapes
-            with st.spinner("⏳ Loading dataset, cleaning text, and building TF-IDF vectors from scratch..."):
+            with st.spinner("Loading dataset, cleaning text, and building TF-IDF vectors from scratch..."):
                 X, y, vectorizer, clean_texts, df_sampled = load_and_preprocess_subset(sample_size, vocab_size)
                 
                 # Split
@@ -878,10 +1101,10 @@ with tab2:
                 
         metrics = st.session_state.metrics
         
-        st.success("✅ Models trained and evaluated successfully!")
+        st.success("Trained models & evaluation parameters serialized successfully.")
         
         # Display Metrics in beautiful format
-        st.markdown("### 🏆 Algorithm Performance Comparison")
+        st.markdown(section_heading("Algorithm Performance Comparison", label="EVALUATION BENCHMARK", accent="#E63946"), unsafe_allow_html=True)
         
         compare_data = {
             "Model Name": list(metrics.keys()),
@@ -907,79 +1130,77 @@ with tab2:
         )
         
         # Plot accuracy and time side-by-side
-        fig_comp, (ax_acc, ax_time) = plt.subplots(1, 2, figsize=(15, 6))
-        fig_comp.patch.set_facecolor('#0F172A')
-        ax_acc.set_facecolor('#1E293B')
-        ax_time.set_facecolor('#1E293B')
-        
-        # Melt dataframe to compare Train vs. Test Accuracy side-by-side
-        melted_acc = compare_df.melt(
-            id_vars="Model Name",
-            value_vars=["Train Accuracy", "Test Accuracy"],
-            var_name="Split",
-            value_name="Accuracy"
-        )
-        
-        # Accuracy comparison
-        sns.barplot(x="Accuracy", y="Model Name", hue="Split", data=melted_acc, palette="coolwarm", ax=ax_acc)
-        ax_acc.set_xlim(0, 1.05)
-        ax_acc.set_title("Train vs. Test Accuracy Comparison", color="#F8FAFC", fontsize=12)
-        ax_acc.set_xlabel("Accuracy", color="#F8FAFC")
-        ax_acc.set_ylabel("", color="#F8FAFC")
-        ax_acc.legend(facecolor='#1E293B', edgecolor='#334155', labelcolor='#F8FAFC')
-        ax_acc.tick_params(colors="#F8FAFC")
-        for spine in ax_acc.spines.values():
-            spine.set_color('#334155')
+        with plt.rc_context(BAUHAUS_CHART_STYLE):
+            fig_comp, (ax_acc, ax_time) = plt.subplots(1, 2, figsize=(15, 6))
             
-        # Training time comparison
-        sns.barplot(x="Train Time (s)", y="Model Name", data=compare_df, palette="viridis", ax=ax_time)
-        ax_time.set_title("Training Time Comparison (Seconds)", color="#F8FAFC", fontsize=12)
-        ax_time.set_xlabel("Seconds", color="#F8FAFC")
-        ax_time.set_ylabel("", color="#F8FAFC")
-        ax_time.tick_params(colors="#F8FAFC")
-        for spine in ax_time.spines.values():
-            spine.set_color('#334155')
+            # Melt dataframe to compare Train vs. Test Accuracy side-by-side
+            melted_acc = compare_df.melt(
+                id_vars="Model Name",
+                value_vars=["Train Accuracy", "Test Accuracy"],
+                var_name="Split",
+                value_name="Accuracy"
+            )
             
-        st.pyplot(fig_comp)
+            # Accuracy comparison
+            sns.barplot(x="Accuracy", y="Model Name", hue="Split", data=melted_acc, 
+                        palette={"Train Accuracy": "#2A9D8F", "Test Accuracy": "#E63946"}, ax=ax_acc)
+            ax_acc.set_xlim(0, 1.05)
+            ax_acc.set_title("Train (Teal) vs. Test (Red) Accuracy", color="#E8E8F0", fontsize=12, fontweight="bold")
+            ax_acc.set_xlabel("Accuracy", color="#E8E8F0")
+            ax_acc.set_ylabel("", color="#E8E8F0")
+            ax_acc.legend(facecolor='#252535', edgecolor='#2C2C40', labelcolor='#E8E8F0')
+            ax_acc.tick_params(colors="#9090A8")
+            for spine in ax_acc.spines.values():
+                spine.set_color('#2C2C40')
+                
+            # Training time comparison
+            sns.barplot(x="Train Time (s)", y="Model Name", data=compare_df, 
+                        palette=["#F4A261", "#2A9D8F", "#E63946", "#457B9D"], ax=ax_time)
+            ax_time.set_title("Computation Time per Model (Seconds)", color="#E8E8F0", fontsize=12, fontweight="bold")
+            ax_time.set_xlabel("Seconds", color="#E8E8F0")
+            ax_time.set_ylabel("", color="#E8E8F0")
+            ax_time.tick_params(colors="#9090A8")
+            for spine in ax_time.spines.values():
+                spine.set_color('#2C2C40')
+                
+            st.pyplot(fig_comp)
         
         # Learning Curves Tab
-        st.markdown("### 📈 Optimization Loss Curves")
+        st.markdown(section_heading("Optimization Loss Curves", label="TRAINING CONVERGENCE", accent="#F4A261"), unsafe_allow_html=True)
         col_curve1, col_curve2 = st.columns(2)
         
         with col_curve1:
-            st.markdown("#### Logistic Regression Cost History")
+            st.markdown("<div class='bauhaus-section-label'>LOGISTIC REGRESSION</div><h4 style='margin:0 0 10px 0;'>Gradient Descent Convergence</h4>", unsafe_allow_html=True)
             losses_log = st.session_state.log_reg.loss_history
-            fig_loss1, ax_l1 = plt.subplots(figsize=(8, 4))
-            fig_loss1.patch.set_facecolor('#0F172A')
-            ax_l1.set_facecolor('#1E293B')
-            ax_l1.plot(losses_log, color='#38BDF8', linewidth=2)
-            ax_l1.set_xlabel("Iteration / Epoch", color="#F8FAFC")
-            ax_l1.set_ylabel("BCE Cost", color="#F8FAFC")
-            ax_l1.set_title("Gradient Descent Convergence", color="#F8FAFC")
-            ax_l1.tick_params(colors="#F8FAFC")
-            ax_l1.grid(True, color="#334155", linestyle="--")
-            for spine in ax_l1.spines.values():
-                spine.set_color('#334155')
-            st.pyplot(fig_loss1)
+            with plt.rc_context(BAUHAUS_CHART_STYLE):
+                fig_loss1, ax_l1 = plt.subplots(figsize=(8, 4))
+                ax_l1.plot(losses_log, color='#2A9D8F', linewidth=2.5)
+                ax_l1.set_xlabel("Iteration / Epoch", color="#E8E8F0")
+                ax_l1.set_ylabel("BCE Loss + L2 Penalty", color="#E8E8F0")
+                ax_l1.set_title("Logistic Regression Cost Curve", color="#E8E8F0", fontweight="bold")
+                ax_l1.tick_params(colors="#9090A8")
+                ax_l1.grid(True, color="#2C2C40", linestyle="--")
+                for spine in ax_l1.spines.values():
+                    spine.set_color('#2C2C40')
+                st.pyplot(fig_loss1)
             
         with col_curve2:
-            st.markdown("#### Neural Network Loss History")
+            st.markdown("<div class='bauhaus-section-label'>NEURAL NETWORK</div><h4 style='margin:0 0 10px 0;'>Backpropagation SGD Convergence</h4>", unsafe_allow_html=True)
             losses_nn = st.session_state.nn.loss_history
-            fig_loss2, ax_l2 = plt.subplots(figsize=(8, 4))
-            fig_loss2.patch.set_facecolor('#0F172A')
-            ax_l2.set_facecolor('#1E293B')
-            ax_l2.plot(losses_nn, color='#EC4899', linewidth=2)
-            ax_l2.set_xlabel("Epoch", color="#F8FAFC")
-            ax_l2.set_ylabel("BCE Loss", color="#F8FAFC")
-            ax_l2.set_title("Backpropagation SGD Convergence", color="#F8FAFC")
-            ax_l2.tick_params(colors="#F8FAFC")
-            ax_l2.grid(True, color="#334155", linestyle="--")
-            for spine in ax_l2.spines.values():
-                spine.set_color('#334155')
-            st.pyplot(fig_loss2)
+            with plt.rc_context(BAUHAUS_CHART_STYLE):
+                fig_loss2, ax_l2 = plt.subplots(figsize=(8, 4))
+                ax_l2.plot(losses_nn, color='#E63946', linewidth=2.5)
+                ax_l2.set_xlabel("Epoch", color="#E8E8F0")
+                ax_l2.set_ylabel("BCE Loss + L2 Penalty", color="#E8E8F0")
+                ax_l2.set_title("Multi-Layer Perceptron Cost Curve", color="#E8E8F0", fontweight="bold")
+                ax_l2.tick_params(colors="#9090A8")
+                ax_l2.grid(True, color="#2C2C40", linestyle="--")
+                for spine in ax_l2.spines.values():
+                    spine.set_color('#2C2C40')
+                st.pyplot(fig_loss2)
 
         # Confusion Matrices Section
-        st.markdown("### 🧮 Confusion Matrices")
+        st.markdown(section_heading("Confusion Matrices", label="CLASSIFICATION MATRICES", accent="#2A9D8F"), unsafe_allow_html=True)
         col_cm1, col_cm2, col_cm3, col_cm4 = st.columns(4)
         cms = [
             ("KNN", col_cm1),
@@ -990,25 +1211,22 @@ with tab2:
         
         for name, col in cms:
             with col:
-                st.markdown(f"##### {name}")
+                st.markdown(f"<div class='card-title'>{name}</div>", unsafe_allow_html=True)
                 m = metrics[name]
                 cm_data = np.array(m['confusion_matrix'])
                 
-                fig_cm, ax_cm = plt.subplots(figsize=(4, 4))
-                fig_cm.patch.set_facecolor('#0F172A')
-                ax_cm.set_facecolor('#1E293B')
-                
-                sns.heatmap(cm_data, annot=True, fmt="d", cmap="Blues", cbar=False,
-                            xticklabels=["Real", "Fake"], yticklabels=["Real", "Fake"], ax=ax_cm,
-                            annot_kws={"size": 14, "weight": "bold"})
-                
-                ax_cm.set_xlabel("Predicted", color="#F8FAFC", fontsize=10)
-                ax_cm.set_ylabel("Actual", color="#F8FAFC", fontsize=10)
-                ax_cm.tick_params(colors="#F8FAFC")
-                for spine in ax_cm.spines.values():
-                    spine.set_color('#334155')
+                with plt.rc_context(BAUHAUS_CHART_STYLE):
+                    fig_cm, ax_cm = plt.subplots(figsize=(4, 4))
+                    sns.heatmap(cm_data, annot=True, fmt="d", cmap=sns.dark_palette("#2A9D8F", as_cmap=True), cbar=False,
+                                xticklabels=["Real", "Fake"], yticklabels=["Real", "Fake"], ax=ax_cm,
+                                annot_kws={"size": 13, "weight": "bold", "color": "#E8E8F0"})
                     
-                st.pyplot(fig_cm)
+                    ax_cm.set_xlabel("Predicted", color="#E8E8F0", fontsize=9, fontfamily="sans-serif")
+                    ax_cm.set_ylabel("Actual", color="#E8E8F0", fontsize=9, fontfamily="sans-serif")
+                    ax_cm.tick_params(colors="#9090A8")
+                    for spine in ax_cm.spines.values():
+                        spine.set_color('#2C2C40')
+                    st.pyplot(fig_cm)
                 
     else:
         st.info("👈 Please select your preferred configurations and click **🚀 Train All Models** in the sidebar to start!")
@@ -1019,8 +1237,8 @@ with tab3:
         st.toast(st.session_state.show_toast)
         st.session_state.show_toast = None
 
-    st.markdown("### 🔮 Verify News & Search Live Coverage")
-    st.markdown("Paste a news headline or article body below. The system will classify the text using our trained models and automatically search both **NewsAPI** and **NewsData.io** to retrieve matching live news reports to support the model's decision.")
+    st.markdown(section_heading("Verify Article & Search Live Coverage", label="REAL-TIME FACT-CHECKING ENGINE", accent="#E63946"), unsafe_allow_html=True)
+    st.markdown("<p style='color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 18px;'>Input a news headline or complete paragraph. The laboratory system executes inferencing across all 4 custom ML models, cross-references live reports via <strong>NewsAPI</strong> & <strong>NewsData.io</strong>, and performs semantic contradiction analysis with Gemini.</p>", unsafe_allow_html=True)
 
     # Initialize session state for news input if not present
     if "news_input_area" not in st.session_state:
@@ -1029,7 +1247,7 @@ with tab3:
     # Load example buttons
     col_ex1, col_ex2 = st.columns(2)
     with col_ex1:
-        if st.button("📰 Load Real News Example", use_container_width=True):
+        if st.button("Load Real News Sample", use_container_width=True):
             st.session_state.news_input_area = (
                 "WASHINGTON (Reuters) - The U.S. Senate approved a sweeping tax reform bill early Saturday morning, "
                 "marking a major legislative victory for President Donald Trump. The Republican-led chamber passed the bill "
@@ -1037,7 +1255,7 @@ with tab3:
                 "since the 1980s, cutting rates for corporations and individuals."
             )
     with col_ex2:
-        if st.button("🚨 Load Fake News Example", use_container_width=True):
+        if st.button("Load Fake News Sample", use_container_width=True):
             st.session_state.news_input_area = (
                 "BREAKING: Pope Francis has shocked the world today by endorsing Donald Trump for President. "
                 "In a statement released by the Vatican, the Pope declared that Donald Trump is the only logical choice "
@@ -1050,10 +1268,10 @@ with tab3:
     remaining = max(0, 600 - len(current_text))
     
     # Styled remaining counter
-    counter_color = "#94A3B8" if remaining > 50 else "#EF4444"
+    counter_color = "var(--text-secondary)" if remaining > 50 else "var(--accent-primary)"
     st.markdown(
-        f"<div style='text-align: right; font-size: 0.85rem; color: {counter_color}; font-weight: bold; margin-bottom: 2px;'>"
-        f"📝 Characters Entered : {remaining}"
+        f"<div style='text-align: right; font-family: var(--font-mono); font-size: 0.78rem; color: {counter_color}; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.08em;'>"
+        f"CHARACTERS REMAINING: {remaining} / 600"
         f"</div>", 
         unsafe_allow_html=True
     )
@@ -1066,7 +1284,7 @@ with tab3:
     news_api_key = load_env_api_key("NEWS_API_KEY")
     newsdata_api_key = load_env_api_key("NEWSDATA_API_KEY")
 
-    verify_trigger = st.button("🔍 Verify Article & Search Live Coverage", use_container_width=True)
+    verify_trigger = st.button("Verify Article & Search Live Coverage", use_container_width=True)
 
     # Initialize request list and results in session state
     if "verification_timestamps" not in st.session_state:
@@ -1076,9 +1294,9 @@ with tab3:
 
     if verify_trigger:
         if not st.session_state.trained or not is_compatible:
-            st.error("⚠️ Please train the models first using Tab 2 or the sidebar button to align model features!")
+            st.error("Please train the models first using Tab 2 or the sidebar button to align model features.")
         elif not news_input.strip():
-            st.warning("⚠️ Please enter some news text to verify.")
+            st.warning("Please enter news text to verify.")
         else:
             # Check for Rate Limiting to protect API keys
             current_time = time.time()
@@ -1092,7 +1310,7 @@ with tab3:
                 # Calculate exactly how many seconds until the oldest request in the window expires
                 oldest_timestamp = st.session_state.verification_timestamps[0]
                 wait_time = max(1, int(oldest_timestamp + 60 - current_time))
-                st.toast(f"⚠️ Rate limit reached (5 requests/minute). Please wait {wait_time}s before verifying again.", icon="⚠️")
+                st.toast(f"Rate limit reached (5 requests/minute). Please wait {wait_time}s.", icon="⚠️")
                 run_verification = False
                 
             if run_verification:
@@ -1155,7 +1373,7 @@ with tab3:
                 
                 coverage_text = "\n".join(coverage_items) if coverage_items else "No live news coverage found."
                 
-                with st.spinner("🤖 Gemini AI is analyzing the article for fact-checking..."):
+                with st.spinner("Gemini AI is analyzing article semantics..."):
                     gemini_result = gemini_fact_check(news_input, search_query, coverage_text)
                     
                 # Signal 1: ML Model Ensemble Vote
@@ -1200,19 +1418,19 @@ with tab3:
                 
                 if final_credibility >= 60:
                     final_verdict = "LIKELY REAL"
-                    verdict_color = "#10B981"
-                    verdict_emoji = "🟢"
-                    verdict_bg = "rgba(16, 185, 129, 0.15)"
+                    verdict_color = "#2A9D8F"
+                    verdict_emoji = "●"
+                    verdict_bg = "var(--bg-raised)"
                 elif final_credibility >= 40:
                     final_verdict = "UNCERTAIN"
-                    verdict_color = "#F59E0B"
-                    verdict_emoji = "🟡"
-                    verdict_bg = "rgba(245, 158, 11, 0.15)"
+                    verdict_color = "#F4A261"
+                    verdict_emoji = "▲"
+                    verdict_bg = "var(--bg-raised)"
                 else:
                     final_verdict = "LIKELY FAKE"
-                    verdict_color = "#EF4444"
-                    verdict_emoji = "🔴"
-                    verdict_bg = "rgba(239, 68, 68, 0.15)"
+                    verdict_color = "#E63946"
+                    verdict_emoji = "■"
+                    verdict_bg = "var(--bg-raised)"
                     
                 highlighted_html = generate_interpretability_html(news_input, st.session_state.vectorizer, st.session_state.log_reg)
                 
@@ -1264,69 +1482,76 @@ with tab3:
         res = st.session_state.verify_results
         
         # 1. Models Decisions
-        st.markdown("### 🏆 Trained Models Decisions")
+        st.markdown(section_heading("Trained Models Decisions", label="INDIVIDUAL PREDICTOR CONSENSUS", accent="#2A9D8F"), unsafe_allow_html=True)
         col_pred1, col_pred2 = st.columns(2)
 
         with col_pred1:
             cls_knn = "model-card-fake" if res["p_knn"] == 1 else "model-card-real"
-            lbl_knn = "🚨 FAKE NEWS" if res["p_knn"] == 1 else "🟢 REAL NEWS"
+            lbl_knn = "FAKE NEWS" if res["p_knn"] == 1 else "REAL NEWS"
             prob_knn_val = res.get("prob_knn", float(res["p_knn"]))
             conf_knn = prob_knn_val if res["p_knn"] == 1 else (1.0 - prob_knn_val)
+            color_knn = "var(--accent-fake)" if res["p_knn"] == 1 else "var(--accent-real)"
             st.markdown(f"""
             <div class='{cls_knn}'>
                 <div class='card-title'>K-Nearest Neighbors</div>
-                <h2 style='margin:0;'>{lbl_knn}</h2>
-                <div style='font-size:0.85rem; opacity:0.85;'>Confidence: {conf_knn:.1%} (k={res.get('k_neighbors', 5)} closest articles)</div>
+                <h2 style='margin:0; font-size:1.8rem; color:{color_knn};'>{lbl_knn}</h2>
+                <div style='font-family:var(--font-mono); font-size:0.8rem; color:var(--text-secondary); margin-top:4px;'>Confidence: {conf_knn:.1%} (k={res.get('k_neighbors', 5)} closest vectors)</div>
             </div>
             """, unsafe_allow_html=True)
 
             cls_rf = "model-card-fake" if res["p_rf"] == 1 else "model-card-real"
-            lbl_rf = "🚨 FAKE NEWS" if res["p_rf"] == 1 else "🟢 REAL NEWS"
+            lbl_rf = "FAKE NEWS" if res["p_rf"] == 1 else "REAL NEWS"
+            color_rf = "var(--accent-fake)" if res["p_rf"] == 1 else "var(--accent-real)"
             st.markdown(f"""
             <div class='{cls_rf}'>
                 <div class='card-title'>Random Forest</div>
-                <h2 style='margin:0;'>{lbl_rf}</h2>
-                <div style='font-size:0.85rem; opacity:0.85;'>Aggregated vote from {res.get('rf_trees', 10)} decision trees</div>
+                <h2 style='margin:0; font-size:1.8rem; color:{color_rf};'>{lbl_rf}</h2>
+                <div style='font-family:var(--font-mono); font-size:0.8rem; color:var(--text-secondary); margin-top:4px;'>Ensemble vote across {res.get('rf_trees', 10)} decision trees</div>
             </div>
             """, unsafe_allow_html=True)
 
         with col_pred2:
             cls_log = "model-card-fake" if res["p_log"] == 1 else "model-card-real"
-            lbl_log = "🚨 FAKE NEWS" if res["p_log"] == 1 else "🟢 REAL NEWS"
+            lbl_log = "FAKE NEWS" if res["p_log"] == 1 else "REAL NEWS"
             pct_log = res["prob_log"] if res["p_log"] == 1 else (1.0 - res["prob_log"])
+            color_log = "var(--accent-fake)" if res["p_log"] == 1 else "var(--accent-real)"
             st.markdown(f"""
             <div class='{cls_log}'>
                 <div class='card-title'>Logistic Regression</div>
-                <h2 style='margin:0;'>{lbl_log}</h2>
-                <div style='font-size:0.85rem; opacity:0.85;'>Confidence probability: {pct_log:.2%}</div>
+                <h2 style='margin:0; font-size:1.8rem; color:{color_log};'>{lbl_log}</h2>
+                <div style='font-family:var(--font-mono); font-size:0.8rem; color:var(--text-secondary); margin-top:4px;'>Sigmoid posterior probability: {pct_log:.2%}</div>
             </div>
             """, unsafe_allow_html=True)
 
             cls_nn = "model-card-fake" if res["p_nn"] == 1 else "model-card-real"
-            lbl_nn = "🚨 FAKE NEWS" if res["p_nn"] == 1 else "🟢 REAL NEWS"
+            lbl_nn = "FAKE NEWS" if res["p_nn"] == 1 else "REAL NEWS"
             pct_nn = res["prob_nn"] if res["p_nn"] == 1 else (1.0 - res["prob_nn"])
+            color_nn = "var(--accent-fake)" if res["p_nn"] == 1 else "var(--accent-real)"
             st.markdown(f"""
             <div class='{cls_nn}'>
                 <div class='card-title'>Simple Neural Network</div>
-                <h2 style='margin:0;'>{lbl_nn}</h2>
-                <div style='font-size:0.85rem; opacity:0.85;'>Confidence probability: {pct_nn:.2%}</div>
+                <h2 style='margin:0; font-size:1.8rem; color:{color_nn};'>{lbl_nn}</h2>
+                <div style='font-family:var(--font-mono); font-size:0.8rem; color:var(--text-secondary); margin-top:4px;'>MLP output probability: {pct_nn:.2%}</div>
             </div>
             """, unsafe_allow_html=True)
 
         # 2. Live Coverage
-        st.markdown("---")
-        st.markdown("### 📡 Live Coverage & Supporting Evidence")
-        st.success(f"🔑 **Gemini Extracted Keywords:** `{res['search_query']}`")
-        st.markdown(f"Searching both news APIs for live coverage matching: **\"{res['search_query']}\"**...")
+        st.markdown(section_heading("Live Search & Supporting Coverage", label="CROSS-REFERENCE SIGNALS", accent="#F4A261"), unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class='nm-inset' style='padding: 12px 18px; margin-bottom: 16px; border-left: 4px solid var(--accent-yellow);'>
+            <span style='font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.12em;'>Gemini Extracted Search Query:</span>
+            <strong style='font-family: var(--font-mono); color: var(--accent-yellow); margin-left: 10px;'>{res['search_query']}</strong>
+        </div>
+        """, unsafe_allow_html=True)
 
         col_newsapi, col_newsdata = st.columns(2)
 
         with col_newsapi:
-            st.markdown("#### 📰 NewsAPI Coverage")
+            st.markdown("<div class='bauhaus-section-label'>NEWSAPI ENDPOINT</div><h4 style='margin:0 0 10px 0;'>NewsAPI Coverage</h4>", unsafe_allow_html=True)
             if not news_api_key:
-                st.info("⚠️ NewsAPI key is not configured in Streamlit Secrets or `.env`.")
+                st.info("NewsAPI key is not configured in Streamlit Secrets or `.env`.")
             elif res["newsapi_count"] == 0:
-                st.warning("🔍 No matching coverage found on NewsAPI.")
+                st.warning("No matching coverage found on NewsAPI.")
             else:
                 for idx, art in enumerate(res["raw_api"]):
                     title = art.get('title', 'No Title')
@@ -1334,18 +1559,20 @@ with tab3:
                     url = art.get('url', '#')
                     desc = art.get('description', '')
                     date = art.get('publishedAt', '')[:10]
-                    st.markdown(f"##### {idx+1}. [{source}] {title}")
-                    st.markdown(f"Published: {date} | [Read full article]({url})")
-                    if desc:
-                        st.write(desc)
-                    st.markdown("<div style='margin-bottom:12px;'></div>", unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div class='nm-raised' style='padding:14px 16px; margin-bottom:12px;'>
+                        <div style='font-family:var(--font-mono); font-size:0.75rem; color:var(--accent-yellow); text-transform:uppercase;'>{source} · {date}</div>
+                        <div style='font-weight:700; font-size:0.95rem; margin:4px 0;'><a href='{url}' target='_blank' style='color:var(--text-primary); text-decoration:none;'>{title}</a></div>
+                        <div style='font-size:0.85rem; color:var(--text-secondary); line-height:1.4;'>{desc}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
         with col_newsdata:
-            st.markdown("#### 📡 NewsData.io Coverage")
+            st.markdown("<div class='bauhaus-section-label'>NEWSDATA ENDPOINT</div><h4 style='margin:0 0 10px 0;'>NewsData.io Coverage</h4>", unsafe_allow_html=True)
             if not newsdata_api_key:
-                st.info("⚠️ NewsData.io key is not configured in Streamlit Secrets or `.env`.")
+                st.info("NewsData.io key is not configured in Streamlit Secrets or `.env`.")
             elif res["newsdata_count"] == 0:
-                st.warning("🔍 No matching coverage found on NewsData.io.")
+                st.warning("No matching coverage found on NewsData.io.")
             else:
                 for idx, art in enumerate(res["raw_data"]):
                     title = art.get('title', 'No Title')
@@ -1353,101 +1580,114 @@ with tab3:
                     url = art.get('link', '#')
                     desc = art.get('description', '')
                     date = art.get('pubDate', '')[:10] if art.get('pubDate') else ''
-                    pub_str = f"Published: {date} | " if date else ""
-                    st.markdown(f"##### {idx+1}. [{source}] {title}")
-                    st.markdown(f"{pub_str}[Read full article]({url})")
-                    if desc:
-                        st.write(desc)
-                    st.markdown("<div style='margin-bottom:12px;'></div>", unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div class='nm-raised' style='padding:14px 16px; margin-bottom:12px;'>
+                        <div style='font-family:var(--font-mono); font-size:0.75rem; color:var(--accent-yellow); text-transform:uppercase;'>{source} · {date}</div>
+                        <div style='font-weight:700; font-size:0.95rem; margin:4px 0;'><a href='{url}' target='_blank' style='color:var(--text-primary); text-decoration:none;'>{title}</a></div>
+                        <div style='font-size:0.85rem; color:var(--text-secondary); line-height:1.4;'>{desc}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
         # 3. AI Verdict
-        st.markdown("---")
-        st.markdown("### 🧠 Unified AI Verdict")
+        st.markdown(section_heading("Unified Fact-Checking Verdict", label="TRI-SIGNAL SYNTHESIS", accent="#E63946"), unsafe_allow_html=True)
 
         sig1, sig2, sig3 = st.columns(3)
         with sig1:
+            verdict_m_color = "var(--accent-fake)" if res["model_verdict"] == "FAKE" else "var(--accent-real)"
             st.markdown(f"""
-            <div style='background: rgba(99, 102, 241, 0.15); border: 1px solid #6366F1; border-radius: 12px; padding: 16px; text-align: center;'>
-                <div style='font-size: 0.8rem; color: #A5B4FC; margin-bottom: 4px;'>📊 ML Models ({res['fake_votes']}/4 say Fake)</div>
-                <h3 style='margin: 0; color: {"#EF4444" if res["model_verdict"] == "FAKE" else "#10B981"};'>{"🔴 FAKE" if res["model_verdict"] == "FAKE" else "🟢 REAL"}</h3>
-                <div style='font-size: 0.8rem; opacity: 0.7;'>Confidence: {res["model_confidence"]:.0f}%</div>
+            <div class='nm-raised' style='padding: 18px; text-align: center; border-top: 3px solid {verdict_m_color};'>
+                <div class='bauhaus-section-label'>ML CONSENSUS</div>
+                <h3 style='margin: 4px 0; color: {verdict_m_color}; font-size: 1.5rem;'>{res["model_verdict"]}</h3>
+                <div style='font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary);'>{res['fake_votes']}/4 Models · {res["model_confidence"]:.0f}%</div>
             </div>
             """, unsafe_allow_html=True)
 
         with sig2:
-            src_label = f"{res['total_sources']} sources found" if res["total_sources"] > 0 else "No sources found"
+            src_label = f"{res['total_sources']} sources" if res["total_sources"] > 0 else "0 sources"
+            verdict_c_color = "var(--accent-real)" if res["cross_ref_score"] >= 50 else "var(--accent-fake)"
+            cov_status = "COVERED" if res["total_sources"] >= 2 else "UNCONFIRMED"
             st.markdown(f"""
-            <div style='background: rgba(99, 102, 241, 0.15); border: 1px solid #6366F1; border-radius: 12px; padding: 16px; text-align: center;'>
-                <div style='font-size: 0.8rem; color: #A5B4FC; margin-bottom: 4px;'>🔍 Cross-Reference ({src_label})</div>
-                <h3 style='margin: 0; color: {"#10B981" if res["cross_ref_score"] >= 50 else "#EF4444"};'>{"✅ Covered" if res["total_sources"] >= 2 else "⚠️ Not Covered"}</h3>
-                <div style='font-size: 0.8rem; opacity: 0.7;'>Score: {res["cross_ref_score"]}/100</div>
+            <div class='nm-raised' style='padding: 18px; text-align: center; border-top: 3px solid {verdict_c_color};'>
+                <div class='bauhaus-section-label'>CROSS-REFERENCE</div>
+                <h3 style='margin: 4px 0; color: {verdict_c_color}; font-size: 1.5rem;'>{cov_status}</h3>
+                <div style='font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary);'>{src_label} · Score {res["cross_ref_score"]}/100</div>
             </div>
             """, unsafe_allow_html=True)
 
         with sig3:
+            verdict_g_color = "var(--accent-fake)" if res["gemini_verdict"] == "FAKE" else "var(--accent-real)" if res["gemini_verdict"] == "REAL" else "var(--accent-yellow)"
             st.markdown(f"""
-            <div style='background: rgba(99, 102, 241, 0.15); border: 1px solid #6366F1; border-radius: 12px; padding: 16px; text-align: center;'>
-                <div style='font-size: 0.8rem; color: #A5B4FC; margin-bottom: 4px;'>🤖 Gemini AI Analysis</div>
-                <h3 style='margin: 0; color: {"#EF4444" if res["gemini_verdict"] == "FAKE" else "#10B981" if res["gemini_verdict"] == "REAL" else "#F59E0B"};'>{"🔴 FAKE" if res["gemini_verdict"] == "FAKE" else "🟢 REAL" if res["gemini_verdict"] == "REAL" else "❓ N/A"}</h3>
-                <div style='font-size: 0.8rem; opacity: 0.7;'>Confidence: {res["gemini_confidence"]}%</div>
+            <div class='nm-raised' style='padding: 18px; text-align: center; border-top: 3px solid {verdict_g_color};'>
+                <div class='bauhaus-section-label'>GEMINI AI REASONING</div>
+                <h3 style='margin: 4px 0; color: {verdict_g_color}; font-size: 1.5rem;'>{res["gemini_verdict"]}</h3>
+                <div style='font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary);'>Confidence {res["gemini_confidence"]}%</div>
             </div>
             """, unsafe_allow_html=True)
 
         if res["gemini_result"]:
             st.markdown(f"""
-            <div style='background: rgba(30, 41, 59, 0.8); border-left: 4px solid #6366F1; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 12px 0;'>
-                <div style='font-size: 0.8rem; color: #A5B4FC; margin-bottom: 4px;'>🤖 Gemini's Reasoning:</div>
-                <div style='color: #E2E8F0;'>{res["gemini_reasoning"]}</div>
+            <div class='nm-inset' style='border-left: 4px solid var(--accent-yellow); padding: 16px 20px; border-radius: 0 10px 10px 0; margin: 18px 0;'>
+                <div style='font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent-yellow); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;'>LLM Semantic Analysis:</div>
+                <div style='color: var(--text-primary); font-size: 0.95rem; line-height: 1.5;'>{res["gemini_reasoning"]}</div>
             </div>
             """, unsafe_allow_html=True)
 
         override_warning_html = ""
         if res["override_applied"]:
-            override_warning_html = "<div style='color: #FCA5A5; font-size: 0.85rem; margin-top: 10px; font-weight: bold;'>⚠️ Capped credibility at 20% because NO matching real-time news articles were found. Prevents style-based false positives.</div>"
+            override_warning_html = "<div style='color: var(--accent-fake); font-family: var(--font-mono); font-size: 0.78rem; margin-top: 10px; font-weight: 700; letter-spacing: 0.05em;'>ZERO-COVERAGE PENALTY: Credibility capped at 20% due to zero matching live news reports.</div>"
 
         st.markdown(
-            f"<div style='background: {res['verdict_bg']}; border: 2px solid {res['verdict_color']}; border-radius: 16px; padding: 24px; text-align: center; margin-top: 16px;'>"
-            f"<div style='font-size: 1rem; color: #94A3B8; margin-bottom: 8px;'>FINAL COMBINED VERDICT</div>"
-            f"<h1 style='margin: 0; color: {res['verdict_color']}; font-size: 2.2rem;'>{res['verdict_emoji']} {res['final_verdict']}</h1>"
-            f"<div style='font-size: 1.1rem; color: #CBD5E1; margin-top: 8px;'>Credibility Score: <strong style=\"color: {res['verdict_color']};\">{res['final_credibility']}/100</strong></div>"
-            f"<div style='background: #1E293B; border-radius: 10px; height: 20px; margin-top: 12px; overflow: hidden;'>"
-            f"<div style='background: {res['verdict_color']}; height: 100%; width: {res['final_credibility']}%; border-radius: 10px; transition: width 0.5s;'></div>"
-            f"</div>"
-            f"{override_warning_html}"
-            f"<div style='font-size: 0.75rem; color: #64748B; margin-top: 12px;'>Weighted: ML Models (20%) + Cross-Reference (40%) + Gemini AI (40%)</div>"
-            f"</div>",
+            f"""
+            <div class='nm-raised' style='border: 2px solid {res["verdict_color"]}; padding: 28px 24px; text-align: center; margin-top: 20px;'>
+                <div style='font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.18em; color: var(--text-secondary); margin-bottom: 6px;'>
+                    FINAL COMBINED VERDICT
+                </div>
+                <h1 style='margin: 0; color: {res["verdict_color"]}; font-family: var(--font-display); font-size: 2.8rem; letter-spacing: -0.02em;'>
+                    {res["final_verdict"]}
+                </h1>
+                <div style='font-family: var(--font-mono); font-size: 1.15rem; color: var(--text-primary); margin-top: 8px;'>
+                    Credibility Score: <strong style="color: {res['verdict_color']};">{res['final_credibility']} / 100</strong>
+                </div>
+                <div class='nm-inset' style='height: 18px; margin: 16px auto 8px auto; max-width: 600px; overflow: hidden; padding: 2px;'>
+                    <div style='background: {res["verdict_color"]}; height: 100%; width: {res["final_credibility"]}%; border-radius: 6px; transition: width 0.6s ease;'></div>
+                </div>
+                {override_warning_html}
+                <div style='font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-secondary); margin-top: 12px; letter-spacing: 0.06em;'>
+                    WEIGHTED FORMULA: ML MODELS (20%) + CROSS-REFERENCE (40%) + GEMINI AI (40%)
+                </div>
+            </div>
+            """,
             unsafe_allow_html=True
         )
 
         # Continuous learning feedback panel
-        st.markdown("---")
-        st.markdown("### 📝 Human-in-the-Loop Continuous Feedback")
+        st.markdown(section_heading("Human-in-the-Loop Continuous Learning", label="ONLINE MODEL ADJUSTMENT", accent="#2A9D8F"), unsafe_allow_html=True)
         
         if st.session_state.get("feedback_success"):
             st.success(st.session_state.feedback_success)
             
-        st.markdown("Help train the models in real-time! If the AI's final combined verdict or individual model predictions are wrong, submit the true label below. The system will perform online learning steps immediately.")
+        st.markdown("<p style='color: var(--text-secondary); font-size: 0.9rem;'>If the verdict contains a false positive or negative, submit the ground truth below. The system executes immediate incremental online gradient updates to Logistic Regression, Neural Network, and memory vector appending to KNN.</p>", unsafe_allow_html=True)
         
         feed_col1, feed_col2 = st.columns([2, 1])
         with feed_col1:
             true_label_choice = st.radio(
-                "What is the actual ground truth for this article?",
+                "Ground truth classification label:",
                 options=["Real News", "Fake News"],
                 horizontal=True,
                 key="feedback_radio"
             )
         with feed_col2:
             st.write("") # Vertical offset spacing
-            submit_feedback = st.button("💾 Submit & Train Instantly", use_container_width=True)
+            submit_feedback = st.button("Submit & Train Instantly", use_container_width=True)
 
         if submit_feedback:
             last_text = news_input.strip()
             if not last_text:
-                st.warning("⚠️ No article text found to train on.")
+                st.warning("No article text found to train on.")
             else:
                 label_val = 0 if true_label_choice == "Real News" else 1
                 
-                with st.spinner("Refining models in real-time..."):
+                with st.spinner("Executing online parameter refinement..."):
                     # Preprocess and extract features using unified pipeline
                     x_input_fb = transform_for_prediction([last_text], st.session_state.vectorizer)
                     
@@ -1461,8 +1701,6 @@ with tab3:
                     
                     # 3. Simple Neural Network
                     st.session_state.nn.partial_fit(x_input_fb, np.array([label_val]))
-                    
-                    # Note: Random Forest cannot be fitted incrementally without full rebuild, so we leave it unchanged.
                     
                     # Log to CSV
                     feedback_file = os.path.join("dataset", "user_feedback.csv")
@@ -1533,20 +1771,20 @@ with tab3:
                     
                     if final_credibility >= 60:
                         res["final_verdict"] = "LIKELY REAL"
-                        res["verdict_color"] = "#10B981"
-                        res["verdict_emoji"] = "🟢"
-                        res["verdict_bg"] = "rgba(16, 185, 129, 0.15)"
+                        res["verdict_color"] = "#2A9D8F"
+                        res["verdict_emoji"] = "●"
+                        res["verdict_bg"] = "var(--bg-raised)"
                     elif final_credibility >= 40:
                         res["final_verdict"] = "UNCERTAIN"
-                        res["verdict_color"] = "#F59E0B"
-                        res["verdict_emoji"] = "🟡"
-                        res["verdict_bg"] = "rgba(245, 158, 11, 0.15)"
+                        res["verdict_color"] = "#F4A261"
+                        res["verdict_emoji"] = "▲"
+                        res["verdict_bg"] = "var(--bg-raised)"
                     else:
                         res["final_verdict"] = "LIKELY FAKE"
-                        res["verdict_color"] = "#EF4444"
-                        res["verdict_emoji"] = "🔴"
-                        res["verdict_bg"] = "rgba(239, 68, 68, 0.15)"
+                        res["verdict_color"] = "#E63946"
+                        res["verdict_emoji"] = "■"
+                        res["verdict_bg"] = "var(--bg-raised)"
                     
-                    st.session_state.show_toast = "✅ Models updated instantly in memory and saved to disk!"
-                    st.session_state.feedback_success = "🎉 Model refined successfully! Real-time predictions refreshed above."
+                    st.session_state.show_toast = "Models updated in memory and serialized to disk."
+                    st.session_state.feedback_success = "Online learning step complete. Predictions updated instantly."
                     st.rerun()
