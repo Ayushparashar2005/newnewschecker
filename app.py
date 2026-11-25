@@ -20,12 +20,12 @@ from src.models.neural_net import SimpleNeuralNetwork
 # Setup page layout
 st.set_page_config(
     page_title="Fake News Detector | Bauhaus ML",
-    page_icon="⚖️",
+    page_icon="⚖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Bauhaus + Neumorphism Design System CSS
+# Bauhaus + Neumorphism Design System CSS (Light Theme)
 st.markdown("""
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,19 +33,21 @@ st.markdown("""
 
 <style>
     :root {
-        --bg-base: #1E1E2E;
-        --bg-raised: #252535;
-        --bg-subtle: #191926;
-        --shadow-dark: #12121C;
-        --shadow-light: #2D2D40;
+        --bg-base: #EEF0F5;
+        --bg-raised: #F5F6FA;
+        --bg-subtle: #E6E8F0;
+        --shadow-dark: #C8CAD6;
+        --shadow-light: #FFFFFF;
         --accent-primary: #E63946;   /* Bauhaus Red */
         --accent-real: #2A9D8F;      /* Bauhaus Teal */
         --accent-fake: #E63946;      /* Bauhaus Red */
-        --accent-yellow: #F4A261;    /* Bauhaus Ochre */
+        --accent-yellow: #D4860F;    /* Bauhaus Ochre */
         --accent-navy: #1D3557;      /* Bauhaus Navy */
-        --text-primary: #E8E8F0;
-        --text-secondary: #9090A8;
-        --grid-line: #2C2C40;
+        --accent-purple: #7B2FBE;    /* Bauhaus Purple */
+        --accent-blue: #457B9D;      /* Bauhaus Steel Blue */
+        --text-primary: #1A1A2E;
+        --text-secondary: #5A5A7A;
+        --grid-line: #D2D4E0;
         --font-display: 'Space Grotesk', -apple-system, sans-serif;
         --font-body: 'DM Sans', -apple-system, sans-serif;
         --font-mono: 'JetBrains Mono', monospace;
@@ -56,6 +58,32 @@ st.markdown("""
         background-color: var(--bg-base) !important;
         color: var(--text-primary) !important;
         font-family: var(--font-body) !important;
+    }
+
+    /* Custom Bauhaus Pill Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: var(--bg-subtle);
+        border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: var(--grid-line);
+        border-radius: 4px;
+        border: 2px solid var(--bg-subtle);
+        transition: background 0.2s ease-in-out;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-primary);
+    }
+    ::-webkit-scrollbar-corner {
+        background: transparent;
+    }
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--grid-line) var(--bg-subtle);
     }
 
     /* Typography Overrides */
@@ -72,13 +100,13 @@ st.markdown("""
         box-shadow: 6px 6px 14px var(--shadow-dark),
                    -6px -6px 14px var(--shadow-light);
         border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.7);
     }
 
     .nm-inset {
         background: var(--bg-subtle);
-        box-shadow: inset 4px 4px 8px var(--shadow-dark),
-                   inset -4px -4px 8px var(--shadow-light);
+        box-shadow: inset 3px 3px 7px var(--shadow-dark),
+                   inset -3px -3px 7px var(--shadow-light);
         border-radius: 10px;
     }
 
@@ -124,7 +152,7 @@ st.markdown("""
         padding: 20px 22px;
         position: relative;
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.8);
     }
     .metric-card::before {
         content: "";
@@ -132,7 +160,7 @@ st.markdown("""
         top: 0;
         left: 0;
         right: 0;
-        height: 3px;
+        height: 4px;
         background: var(--card-accent, var(--accent-primary));
     }
     .metric-value {
@@ -162,6 +190,7 @@ st.markdown("""
         border-radius: 0 12px 12px 0;
         padding: 18px 20px;
         margin: 10px 0;
+        border: 1px solid rgba(255, 255, 255, 0.7);
     }
     .model-card-fake {
         background: var(--bg-raised);
@@ -171,6 +200,7 @@ st.markdown("""
         border-radius: 0 12px 12px 0;
         padding: 18px 20px;
         margin: 10px 0;
+        border: 1px solid rgba(255, 255, 255, 0.7);
     }
     .card-title {
         font-family: var(--font-mono);
@@ -214,7 +244,7 @@ st.markdown("""
     section[data-testid="stSidebar"] {
         background: var(--bg-raised) !important;
         border-right: 3px solid var(--accent-primary) !important;
-        box-shadow: 6px 0 20px rgba(0, 0, 0, 0.4) !important;
+        box-shadow: 4px 0 16px rgba(0, 0, 0, 0.05) !important;
     }
     section[data-testid="stSidebar"] .block-container {
         padding-top: 2rem !important;
@@ -261,6 +291,8 @@ st.markdown("""
         background: var(--bg-raised) !important;
         border-radius: 10px !important;
         border: 1px solid var(--grid-line) !important;
+        box-shadow: 4px 4px 10px var(--shadow-dark),
+                   -4px -4px 10px var(--shadow-light) !important;
         overflow: hidden !important;
     }
 
@@ -269,7 +301,8 @@ st.markdown("""
         background: var(--bg-raised) !important;
         border: 1px solid var(--grid-line) !important;
         border-radius: 8px !important;
-        box-shadow: 3px 3px 8px var(--shadow-dark) !important;
+        box-shadow: 3px 3px 8px var(--shadow-dark),
+                   -3px -3px 8px var(--shadow-light) !important;
     }
 
     /* Radio / Selection options */
@@ -292,16 +325,16 @@ def section_heading(title: str, label: str = "", accent: str = "#E63946"):
 
 # Standard Matplotlib Bauhaus theme
 BAUHAUS_CHART_STYLE = {
-    "figure.facecolor": "#1E1E2E",
-    "axes.facecolor": "#252535",
-    "axes.edgecolor": "#2C2C40",
-    "axes.labelcolor": "#9090A8",
-    "text.color": "#E8E8F0",
-    "xtick.color": "#9090A8",
-    "ytick.color": "#9090A8",
-    "grid.color": "#2C2C40",
+    "figure.facecolor": "#EEF0F5",
+    "axes.facecolor": "#F5F6FA",
+    "axes.edgecolor": "#D2D4E0",
+    "axes.labelcolor": "#5A5A7A",
+    "text.color": "#1A1A2E",
+    "xtick.color": "#5A5A7A",
+    "ytick.color": "#5A5A7A",
+    "grid.color": "#D2D4E0",
     "grid.linestyle": "--",
-    "grid.alpha": 0.5,
+    "grid.alpha": 0.6,
     "font.family": "sans-serif",
 }
 
@@ -376,12 +409,12 @@ def generate_interpretability_html(raw_text, vectorizer, log_reg):
             if weight > threshold:
                 # Fake association (Red shading)
                 highlighted_tokens.append(
-                    f"<span style='background-color: rgba(239, 68, 68, 0.18); color: #F87171; border-radius: 4px; padding: 1px 3px; font-weight: 600; cursor: help;' title='Weight: {weight:+.4f} (Fake News factor)'>{escaped_token}</span>"
+                    f"<span style='background-color: rgba(230, 57, 70, 0.16); color: #C52838; border-bottom: 2px solid #E63946; border-radius: 4px; padding: 1px 3px; font-weight: 600; cursor: help;' title='Weight: {weight:+.4f} (Fake News factor)'>{escaped_token}</span>"
                 )
             elif weight < -threshold:
                 # Real association (Green shading)
                 highlighted_tokens.append(
-                    f"<span style='background-color: rgba(16, 185, 129, 0.18); color: #34D399; border-radius: 4px; padding: 1px 3px; font-weight: 600; cursor: help;' title='Weight: {weight:+.4f} (Real News factor)'>{escaped_token}</span>"
+                    f"<span style='background-color: rgba(42, 157, 143, 0.16); color: #1E7B70; border-bottom: 2px solid #2A9D8F; border-radius: 4px; padding: 1px 3px; font-weight: 600; cursor: help;' title='Weight: {weight:+.4f} (Real News factor)'>{escaped_token}</span>"
                 )
             else:
                 highlighted_tokens.append(escaped_token)
@@ -916,7 +949,169 @@ st.sidebar.markdown("<div style='border-top: 1px solid var(--grid-line); margin:
 train_trigger = st.sidebar.button("Train All Models", use_container_width=True)
 
 # Tabs
-tab1, tab2, tab3 = st.tabs(["DATASET & EDA", "MODEL BENCHMARK", "LIVE VERIFIER"])
+tab0, tab1, tab2, tab3 = st.tabs(["SYSTEM OVERVIEW", "DATASET & EDA", "MODEL BENCHMARK", "LIVE VERIFIER"])
+
+# TAB 0: SYSTEM OVERVIEW (LANDING PAGE)
+with tab0:
+    st.markdown("""
+    <div class="nm-raised" style="padding: 28px 32px; margin-bottom: 24px; position: relative; overflow: hidden; border-left: 6px solid var(--accent-primary);">
+        <div style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: var(--accent-primary); margin-bottom: 8px;">
+            [ ARCHITECTURAL OVERVIEW // MULTI-MODAL FACT VERIFICATION ]
+        </div>
+        <h2 style="font-size: 2.2rem; font-weight: 800; color: var(--text-primary); margin: 0 0 12px 0; line-height: 1.15;">
+            Intelligent News Verification Engine
+        </h2>
+        <p style="font-size: 1.05rem; color: var(--text-secondary); max-width: 880px; margin: 0 0 20px 0; line-height: 1.55;">
+            Engineered from mathematical first principles. Combines <strong>4 scratch-built machine learning models</strong> (without Scikit-Learn) with 
+            real-time global press aggregation APIs and <strong>Google Gemini 2.5</strong> deep semantic auditing to deliver rigorous, triangulated veracity scores.
+        </p>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <span style="background: var(--bg-subtle); color: var(--text-primary); font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--grid-line);">
+                ■ 4 SCRATCH ML ALGORITHMS
+            </span>
+            <span style="background: var(--bg-subtle); color: var(--accent-real); font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--grid-line);">
+                ● LIVE PRESS CROSS-EXAMINATION
+            </span>
+            <span style="background: var(--bg-subtle); color: var(--accent-yellow); font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--grid-line);">
+                ▲ GEMINI MULTIMODAL AUDIT
+            </span>
+            <span style="background: var(--bg-subtle); color: var(--accent-purple); font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--grid-line);">
+                ◆ CONTINUOUS ONLINE SGD
+            </span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown(section_heading("System Pillars & Multi-Signal Architecture", label="PILLARS OF VERIFICATION", accent="#E63946"), unsafe_allow_html=True)
+    
+    col_p1, col_p2, col_p3, col_p4, col_p5 = st.columns(5)
+    
+    with col_p1:
+        st.markdown("""
+        <div class="metric-card" style="--card-accent: #E63946; min-height: 195px;">
+            <div style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: #E63946;">■ 01 / ML MODELS</div>
+            <div style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin: 6px 0;">4 Custom Engines</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">Neural Network, Logistic Reg, Random Forest, & KNN written with NumPy.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col_p2:
+        st.markdown("""
+        <div class="metric-card" style="--card-accent: #2A9D8F; min-height: 195px;">
+            <div style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: #2A9D8F;">● 02 / PRESS RADAR</div>
+            <div style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin: 6px 0;">Live News Sync</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">Real-time entity lookup across NewsAPI & NewsData.io to check global coverage.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col_p3:
+        st.markdown("""
+        <div class="metric-card" style="--card-accent: #D4860F; min-height: 195px;">
+            <div style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: #D4860F;">▲ 03 / GEMINI AUDIT</div>
+            <div style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin: 6px 0;">LLM Synthesis</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">Gemini 2.5 contextually audits deceptive phrasing, clickbait, and rhetorical spin.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col_p4:
+        st.markdown("""
+        <div class="metric-card" style="--card-accent: #7B2FBE; min-height: 195px;">
+            <div style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: #7B2FBE;">◆ 04 / EXPLAINABILITY</div>
+            <div style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin: 6px 0;">Term Attribution</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">Exact word-level TF-IDF importance and logistic weight breakdown for transparent audits.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col_p5:
+        st.markdown("""
+        <div class="metric-card" style="--card-accent: #457B9D; min-height: 195px;">
+            <div style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: #457B9D;">▬ 05 / ADAPTIVE SGD</div>
+            <div style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin: 6px 0;">Online Learning</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">Human correction loop continuously updates model weights and commits to disk.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown(section_heading("Empirical Test Benchmarks (Scratch Models)", label="MODEL PERFORMANCE METRICS", accent="#2A9D8F"), unsafe_allow_html=True)
+    
+    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+    with col_m1:
+        st.markdown("""
+        <div class="metric-card" style="--card-accent: #2A9D8F;">
+            <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase;">MULTI-LAYER PERCEPTRON</div>
+            <div class="metric-value" style="color: #2A9D8F;">95.50%</div>
+            <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">F1 Score: 0.9550 · Top Performer</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_m2:
+        st.markdown("""
+        <div class="metric-card" style="--card-accent: #457B9D;">
+            <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase;">LOGISTIC REGRESSION</div>
+            <div class="metric-value" style="color: #457B9D;">92.50%</div>
+            <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">F1 Score: 0.9239 · Fast & Robust</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_m3:
+        st.markdown("""
+        <div class="metric-card" style="--card-accent: #7B2FBE;">
+            <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase;">RANDOM FOREST (10 TREES)</div>
+            <div class="metric-value" style="color: #7B2FBE;">87.50%</div>
+            <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">F1 Score: 0.8596 · Midpoint Splits</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_m4:
+        st.markdown("""
+        <div class="metric-card" style="--card-accent: #D4860F;">
+            <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase;">K-NEAREST NEIGHBORS (K=5)</div>
+            <div class="metric-value" style="color: #D4860F;">86.00%</div>
+            <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">F1 Score: 0.8534 · Distance Voted</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown(section_heading("Triangulated Verification Pipeline", label="HOW IT WORKS", accent="#D4860F"), unsafe_allow_html=True)
+    
+    col_w1, col_w2, col_w3 = st.columns(3)
+    with col_w1:
+        st.markdown("""
+        <div class="nm-raised" style="padding: 20px; min-height: 160px; border-top: 3px solid var(--accent-primary);">
+            <div style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: var(--accent-primary);">STEP 01</div>
+            <h4 style="margin: 4px 0 8px 0;">Tokenize & Extract</h4>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45;">
+                Text is normalized, cleaned, and mapped to a custom TF-IDF matrix with uppercase & exclamation mark stylistic density features.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_w2:
+        st.markdown("""
+        <div class="nm-raised" style="padding: 20px; min-height: 160px; border-top: 3px solid #457B9D;">
+            <div style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: #457B9D;">STEP 02</div>
+            <h4 style="margin: 4px 0 8px 0;">Multi-Model Consensus</h4>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45;">
+                Predictions from all 4 scratch classifiers are evaluated. Soft probabilities are combined via weighted consensus voting.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_w3:
+        st.markdown("""
+        <div class="nm-raised" style="padding: 20px; min-height: 160px; border-top: 3px solid #2A9D8F;">
+            <div style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: #2A9D8F;">STEP 03</div>
+            <h4 style="margin: 4px 0 8px 0;">Multi-Signal Verdict</h4>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45;">
+                ML output (20%) is triangulated against live press coverage (40%) and Gemini reasoning (40%) to prevent false positives.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="nm-inset" style="padding: 18px 24px; margin-top: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div style="font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.12em;">
+            SYSTEM STACK: PYTHON 3.12 · NUMPY LINEAR ALGEBRA · STREAMLIT · GEMINI 2.5 · NEWSAPI · NEWSDATA.IO
+        </div>
+        <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-primary); font-weight: 700;">
+            100% PURE ALGORITHMIC ML (NO SKLEARN)
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
 
 # State Initialization completed above.
 
@@ -964,20 +1159,20 @@ with tab1:
         with plt.rc_context(BAUHAUS_CHART_STYLE):
             fig, ax = plt.subplots(figsize=(10, 5))
             sns.histplot(data=df_eda, x='word_count', hue='label', kde=True, bins=30, palette={0: '#2A9D8F', 1: '#E63946'}, ax=ax, alpha=0.65)
-            ax.set_xlabel("Word Count", color='#E8E8F0')
-            ax.set_ylabel("Count", color='#E8E8F0')
-            ax.set_title("Length Distribution: Real (Teal) vs Fake (Red)", color='#E8E8F0', fontweight="bold")
-            ax.tick_params(colors='#9090A8')
+            ax.set_xlabel("Word Count", color='#1A1A2E')
+            ax.set_ylabel("Count", color='#1A1A2E')
+            ax.set_title("Length Distribution: Real (Teal) vs Fake (Red)", color='#1A1A2E', fontweight="bold")
+            ax.tick_params(colors='#5A5A7A')
             for spine in ax.spines.values():
-                spine.set_color('#2C2C40')
+                spine.set_color('#D2D4E0')
             legend = ax.get_legend()
             if legend:
                 legend.get_texts()[0].set_text('Real News')
                 legend.get_texts()[1].set_text('Fake News')
-                legend.get_frame().set_facecolor('#252535')
-                legend.get_frame().set_edgecolor('#2C2C40')
+                legend.get_frame().set_facecolor('#F5F6FA')
+                legend.get_frame().set_edgecolor('#D2D4E0')
                 for text in legend.get_texts():
-                    text.set_color('#E8E8F0')
+                    text.set_color('#1A1A2E')
             st.pyplot(fig)
         
     with col_chart2:
@@ -992,12 +1187,12 @@ with tab1:
             fig, ax = plt.subplots(figsize=(10, 5))
             palette_colors = ["#E63946", "#2A9D8F", "#F4A261", "#457B9D"] * 3
             sns.barplot(x='tf_idf_weight', y='word', data=freq_df, palette=palette_colors[:len(freq_df)], ax=ax)
-            ax.set_xlabel("Cumulative TF-IDF Score", color='#E8E8F0')
-            ax.set_ylabel("Terms", color='#E8E8F0')
-            ax.set_title("Top 10 Distinguishing Vocabulary Terms", color='#E8E8F0', fontweight="bold")
-            ax.tick_params(colors='#9090A8')
+            ax.set_xlabel("Cumulative TF-IDF Score", color='#1A1A2E')
+            ax.set_ylabel("Terms", color='#1A1A2E')
+            ax.set_title("Top 10 Distinguishing Vocabulary Terms", color='#1A1A2E', fontweight="bold")
+            ax.tick_params(colors='#5A5A7A')
             for spine in ax.spines.values():
-                spine.set_color('#2C2C40')
+                spine.set_color('#D2D4E0')
             st.pyplot(fig)
 
     st.markdown("""
@@ -1145,23 +1340,23 @@ with tab2:
             sns.barplot(x="Accuracy", y="Model Name", hue="Split", data=melted_acc, 
                         palette={"Train Accuracy": "#2A9D8F", "Test Accuracy": "#E63946"}, ax=ax_acc)
             ax_acc.set_xlim(0, 1.05)
-            ax_acc.set_title("Train (Teal) vs. Test (Red) Accuracy", color="#E8E8F0", fontsize=12, fontweight="bold")
-            ax_acc.set_xlabel("Accuracy", color="#E8E8F0")
-            ax_acc.set_ylabel("", color="#E8E8F0")
-            ax_acc.legend(facecolor='#252535', edgecolor='#2C2C40', labelcolor='#E8E8F0')
-            ax_acc.tick_params(colors="#9090A8")
+            ax_acc.set_title("Train (Teal) vs. Test (Red) Accuracy", color="#1A1A2E", fontsize=12, fontweight="bold")
+            ax_acc.set_xlabel("Accuracy", color="#1A1A2E")
+            ax_acc.set_ylabel("", color="#1A1A2E")
+            ax_acc.legend(facecolor='#F5F6FA', edgecolor='#D2D4E0', labelcolor='#1A1A2E')
+            ax_acc.tick_params(colors="#5A5A7A")
             for spine in ax_acc.spines.values():
-                spine.set_color('#2C2C40')
+                spine.set_color('#D2D4E0')
                 
             # Training time comparison
             sns.barplot(x="Train Time (s)", y="Model Name", data=compare_df, 
                         palette=["#F4A261", "#2A9D8F", "#E63946", "#457B9D"], ax=ax_time)
-            ax_time.set_title("Computation Time per Model (Seconds)", color="#E8E8F0", fontsize=12, fontweight="bold")
-            ax_time.set_xlabel("Seconds", color="#E8E8F0")
-            ax_time.set_ylabel("", color="#E8E8F0")
-            ax_time.tick_params(colors="#9090A8")
+            ax_time.set_title("Computation Time per Model (Seconds)", color="#1A1A2E", fontsize=12, fontweight="bold")
+            ax_time.set_xlabel("Seconds", color="#1A1A2E")
+            ax_time.set_ylabel("", color="#1A1A2E")
+            ax_time.tick_params(colors="#5A5A7A")
             for spine in ax_time.spines.values():
-                spine.set_color('#2C2C40')
+                spine.set_color('#D2D4E0')
                 
             st.pyplot(fig_comp)
         
@@ -1175,13 +1370,13 @@ with tab2:
             with plt.rc_context(BAUHAUS_CHART_STYLE):
                 fig_loss1, ax_l1 = plt.subplots(figsize=(8, 4))
                 ax_l1.plot(losses_log, color='#2A9D8F', linewidth=2.5)
-                ax_l1.set_xlabel("Iteration / Epoch", color="#E8E8F0")
-                ax_l1.set_ylabel("BCE Loss + L2 Penalty", color="#E8E8F0")
-                ax_l1.set_title("Logistic Regression Cost Curve", color="#E8E8F0", fontweight="bold")
-                ax_l1.tick_params(colors="#9090A8")
-                ax_l1.grid(True, color="#2C2C40", linestyle="--")
+                ax_l1.set_xlabel("Iteration / Epoch", color="#1A1A2E")
+                ax_l1.set_ylabel("BCE Loss + L2 Penalty", color="#1A1A2E")
+                ax_l1.set_title("Logistic Regression Cost Curve", color="#1A1A2E", fontweight="bold")
+                ax_l1.tick_params(colors="#5A5A7A")
+                ax_l1.grid(True, color="#D2D4E0", linestyle="--")
                 for spine in ax_l1.spines.values():
-                    spine.set_color('#2C2C40')
+                    spine.set_color('#D2D4E0')
                 st.pyplot(fig_loss1)
             
         with col_curve2:
@@ -1190,13 +1385,13 @@ with tab2:
             with plt.rc_context(BAUHAUS_CHART_STYLE):
                 fig_loss2, ax_l2 = plt.subplots(figsize=(8, 4))
                 ax_l2.plot(losses_nn, color='#E63946', linewidth=2.5)
-                ax_l2.set_xlabel("Epoch", color="#E8E8F0")
-                ax_l2.set_ylabel("BCE Loss + L2 Penalty", color="#E8E8F0")
-                ax_l2.set_title("Multi-Layer Perceptron Cost Curve", color="#E8E8F0", fontweight="bold")
-                ax_l2.tick_params(colors="#9090A8")
-                ax_l2.grid(True, color="#2C2C40", linestyle="--")
+                ax_l2.set_xlabel("Epoch", color="#1A1A2E")
+                ax_l2.set_ylabel("BCE Loss + L2 Penalty", color="#1A1A2E")
+                ax_l2.set_title("Multi-Layer Perceptron Cost Curve", color="#1A1A2E", fontweight="bold")
+                ax_l2.tick_params(colors="#5A5A7A")
+                ax_l2.grid(True, color="#D2D4E0", linestyle="--")
                 for spine in ax_l2.spines.values():
-                    spine.set_color('#2C2C40')
+                    spine.set_color('#D2D4E0')
                 st.pyplot(fig_loss2)
 
         # Confusion Matrices Section
@@ -1217,15 +1412,15 @@ with tab2:
                 
                 with plt.rc_context(BAUHAUS_CHART_STYLE):
                     fig_cm, ax_cm = plt.subplots(figsize=(4, 4))
-                    sns.heatmap(cm_data, annot=True, fmt="d", cmap=sns.dark_palette("#2A9D8F", as_cmap=True), cbar=False,
+                    sns.heatmap(cm_data, annot=True, fmt="d", cmap=sns.light_palette("#2A9D8F", as_cmap=True), cbar=False,
                                 xticklabels=["Real", "Fake"], yticklabels=["Real", "Fake"], ax=ax_cm,
-                                annot_kws={"size": 13, "weight": "bold", "color": "#E8E8F0"})
+                                annot_kws={"size": 13, "weight": "bold", "color": "#1A1A2E"})
                     
-                    ax_cm.set_xlabel("Predicted", color="#E8E8F0", fontsize=9, fontfamily="sans-serif")
-                    ax_cm.set_ylabel("Actual", color="#E8E8F0", fontsize=9, fontfamily="sans-serif")
-                    ax_cm.tick_params(colors="#9090A8")
+                    ax_cm.set_xlabel("Predicted", color="#1A1A2E", fontsize=9, fontfamily="sans-serif")
+                    ax_cm.set_ylabel("Actual", color="#1A1A2E", fontsize=9, fontfamily="sans-serif")
+                    ax_cm.tick_params(colors="#5A5A7A")
                     for spine in ax_cm.spines.values():
-                        spine.set_color('#2C2C40')
+                        spine.set_color('#D2D4E0')
                     st.pyplot(fig_cm)
                 
     else:
