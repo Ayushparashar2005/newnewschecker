@@ -104,3 +104,66 @@ class CustomTfidfVectorizer:
 
     def fit_transform(self, raw_documents):
         return self.fit(raw_documents).transform(raw_documents)
+
+
+class SequenceTokenizer:
+    """
+    Tokenizer and sequence padder for Recurrent Neural Networks (LSTM/GRU).
+    Maps raw text documents into fixed-length integer token sequences.
+    0: <PAD>, 1: <UNK>, 2..N: Word vocabulary indices.
+    Fully serializable via pickle with zero external dependencies.
+    """
+    PAD_TOKEN = 0
+    UNK_TOKEN = 1
+
+    def __init__(self, max_vocab=5000, max_len=150):
+        self.max_vocab = max_vocab
+        self.max_len = max_len
+        self.word_to_idx = {"<PAD>": self.PAD_TOKEN, "<UNK>": self.UNK_TOKEN}
+        self.idx_to_word = {self.PAD_TOKEN: "<PAD>", self.UNK_TOKEN: "<UNK>"}
+        self.vocab_size = 2
+
+    def fit(self, raw_documents):
+        """
+        Builds the vocabulary from raw text documents based on frequency.
+        """
+        counts = Counter()
+        for doc in raw_documents:
+            if isinstance(doc, str):
+                tokens = doc.lower().split()
+            else:
+                tokens = [str(t).lower() for t in doc]
+            counts.update(tokens)
+
+        # Reserve indices 0 (<PAD>) and 1 (<UNK>)
+        top_words = counts.most_common(self.max_vocab - 2)
+        for idx, (word, _) in enumerate(top_words, start=2):
+            self.word_to_idx[word] = idx
+            self.idx_to_word[idx] = word
+
+        self.vocab_size = len(self.word_to_idx)
+        return self
+
+    def transform(self, raw_documents):
+        """
+        Transforms raw text documents into a padded/truncated 2D NumPy array of shape (N, max_len).
+        """
+        num_docs = len(raw_documents)
+        sequences = np.full((num_docs, self.max_len), self.PAD_TOKEN, dtype=np.int32)
+
+        for i, doc in enumerate(raw_documents):
+            if isinstance(doc, str):
+                tokens = doc.lower().split()
+            else:
+                tokens = [str(t).lower() for t in doc]
+
+            # Truncate tokens to max_len if necessary
+            tokens = tokens[:self.max_len]
+
+            for t, token in enumerate(tokens):
+                sequences[i, t] = self.word_to_idx.get(token, self.UNK_TOKEN)
+
+        return sequences
+
+    def fit_transform(self, raw_documents):
+        return self.fit(raw_documents).transform(raw_documents)

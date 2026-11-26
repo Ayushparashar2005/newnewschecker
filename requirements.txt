@@ -4,3 +4,5 @@ numpy
 requests
 matplotlib
 seaborn
+transformers>=4.36.0
+torch>=2.1.0

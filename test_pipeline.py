@@ -6,6 +6,9 @@ from src.models.knn import KNNClassifier
 from src.models.logistic_reg import LogisticRegressionClassifier
 from src.models.random_forest import RandomForestClassifier
 from src.models.neural_net import SimpleNeuralNetwork
+from src.features import SequenceTokenizer
+from src.models.lstm_rnn import LSTMClassifier
+from src.models.bert_classifier import BERTClassifier
 
 def main():
     print("=== Starting Fake News Pipeline Verification ===")
@@ -73,6 +76,29 @@ def main():
         # Calculate and print metrics
         report = classification_report_scratch(y_test, test_preds)
         print(report)
+
+    # 6. Test LSTM Classifier (Sequences)
+    print("\n--- Testing LSTM Classifier (Scratch NumPy) ---")
+    seq_tok = SequenceTokenizer(max_vocab=30, max_len=10)
+    X_seq = seq_tok.fit_transform(clean_texts)
+    lstm = LSTMClassifier(vocab_size=seq_tok.vocab_size, embed_dim=16, hidden_dim=32, epochs=5, batch_size=4)
+    lstm.fit(X_seq, labels)
+    lstm_preds = lstm.predict(X_seq)
+    lstm_probs = lstm.predict_proba(X_seq)
+    print(f"  LSTM Predictions: {lstm_preds}")
+    print(f"  LSTM Probabilities: {np.round(lstm_probs, 4)}")
+    print(f"  LSTM Train Accuracy: {np.mean(lstm_preds == labels):.4f}")
+
+    # 7. Test BERT Classifier Head
+    print("\n--- Testing DistilBERT Classification Head (NumPy) ---")
+    bert = BERTClassifier(hidden_dim=32, epochs=5, batch_size=4)
+    dummy_emb = np.random.randn(len(raw_texts), 768).astype(np.float32)
+    bert.fit_from_embeddings(dummy_emb, labels)
+    bert_preds = bert.predict(dummy_emb)
+    bert_probs = bert.predict_proba(dummy_emb)
+    print(f"  BERT Head Predictions: {bert_preds}")
+    print(f"  BERT Head Probabilities: {np.round(bert_probs, 4)}")
+    print(f"  BERT Head Accuracy: {np.mean(bert_preds == labels):.4f}")
 
     print("=== Pipeline Verification Completed Successfully ===")
 

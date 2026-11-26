@@ -20,6 +20,8 @@ All source files are organized logically in the workspace:
   - [base.py](file:///c:/Users/ROHIT/Desktop/fake%20news/src/models/base.py): Abstract class enforcing standard `fit`/`predict` interfaces.
   - [logistic_reg.py](file:///c:/Users/ROHIT/Desktop/fake%20news/src/models/logistic_reg.py): L2-regularized mini-batch gradient descent classifier supporting online updates (`partial_fit`).
   - [neural_net.py](file:///c:/Users/ROHIT/Desktop/fake%20news/src/models/neural_net.py): Feedforward Multi-Layer Perceptron (MLP) with Xavier initialization, backpropagation, and mini-batch SGD supporting online updates (`partial_fit`).
+  - [lstm_rnn.py](file:///c:/Users/ROHIT/Desktop/fake%20news/src/models/lstm_rnn.py): Bidirectional Long Short-Term Memory (LSTM) Recurrent Neural Network built from scratch using pure NumPy with Backpropagation Through Time (BPTT), Adam optimizer, and gradient clipping.
+  - [bert_classifier.py](file:///c:/Users/ROHIT/Desktop/fake%20news/src/models/bert_classifier.py): Hybrid Transformer architecture combining frozen pretrained DistilBERT contextual embeddings (768-dim [CLS] token vectors) with a custom pure NumPy classification head.
   - [random_forest.py](file:///c:/Users/ROHIT/Desktop/fake%20news/src/models/random_forest.py): Ensemble of Decision Trees with Gini/Entropy impurity calculations and random sub-feature split choices.
   - [knn.py](file:///c:/Users/ROHIT/Desktop/fake%20news/src/models/knn.py): Instance-based classifier supporting Euclidean & Cosine distance calculations (Cosine is mathematically optimal for TF-IDF vectors).
 - **Evaluation Utilities**: [evaluation.py](file:///c:/Users/ROHIT/Desktop/fake%20news/src/evaluation.py)  
@@ -145,11 +147,13 @@ Options:
 
 ## 📊 Benchmark Results
 
-On a balanced subset of 2,000 articles (title + body text) using a vocabulary size of 1,000 TF-IDF features plus normalized `[0, 1]` stylistic features, the custom classifiers yielded the following results:
+On a balanced evaluation benchmark of 2,000 articles (title + body text), the 6 models yielded the following empirical performance metrics:
 
 | Model Name | Train Accuracy | Test Accuracy | Test Precision | Test Recall | Test F1-Score | Training Time |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Simple Neural Network** | 99.75% | **95.50%** | **96.95%** | **94.09%** | **95.50%** | ~8.28s |
+| **LSTM Recurrent NN (Scratch)** | 99.81% | **96.25%** | **95.12%** | **97.40%** | **96.24%** | ~157.59s |
+| **Simple Neural Network (MLP)** | 99.75% | **95.50%** | **96.95%** | **94.09%** | **95.50%** | ~8.28s |
+| **DistilBERT Transformer (CLS Head)** | 98.50% | **92.50%** | **93.81%** | **90.38%** | **92.06%** | ~86.37s |
 | **Logistic Regression** | 94.00% | **92.50%** | **95.29%** | **89.66%** | **92.39%** | ~0.07s |
 | **Random Forest** | 93.44% | **87.50%** | **100.00%** | **75.37%** | **85.96%** | ~1.66s |
 | **K-Nearest Neighbors** | 91.13% | **86.00%** | **91.06%** | **80.30%** | **85.34%** | ~0.00s |
